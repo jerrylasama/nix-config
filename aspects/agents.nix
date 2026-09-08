@@ -16,6 +16,10 @@
           service_tier = "default";
           plan_mode_reasoning_effort = "max";
 
+          projects."/path/to/nix-config" = {
+            trust_level = "trusted";
+          };
+
           tui.status_line = [
             "model"
             "context-remaining"
