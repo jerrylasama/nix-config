@@ -6,6 +6,15 @@ cd "$ROOT_DIR"
 
 failures=0
 
+# These tools keep native state in the user's home directory by default. The
+# verifier must also work from CI and Nix sandboxes where that directory may be
+# read-only.
+VERIFY_RUNTIME_DIR=$(mktemp -d "${TMPDIR:-/tmp}/nix-config-verify.XXXXXX")
+export GRADLE_USER_HOME="$VERIFY_RUNTIME_DIR/gradle"
+export FLUTTER_SUPPRESS_ANALYTICS=true
+export XDG_CACHE_HOME="$VERIFY_RUNTIME_DIR/cache"
+mkdir -p "$GRADLE_USER_HOME" "$XDG_CACHE_HOME"
+
 pass() {
   printf 'PASS  %s\n' "$1"
 }

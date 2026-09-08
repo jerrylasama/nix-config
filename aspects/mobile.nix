@@ -12,7 +12,10 @@
       {
         home.packages = [ pkgs.flutter ] ++ lib.optional isLinux android;
 
-        home.sessionVariables = lib.mkIf isLinux {
+        home.sessionVariables = {
+          FLUTTER_SUPPRESS_ANALYTICS = "true";
+        }
+        // lib.optionalAttrs isLinux {
           ANDROID_HOME = sdkRoot;
           ANDROID_SDK_ROOT = sdkRoot;
         };

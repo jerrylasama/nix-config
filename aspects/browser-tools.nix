@@ -13,9 +13,11 @@
         cliConfig = builtins.toJSON {
           browser = {
             browserName = "chromium";
+            isolated = true;
             launchOptions = {
               executablePath = "${pkgs.chromium}/bin/chromium";
               headless = true;
+              chromiumSandbox = false;
               args = [
                 "--no-sandbox"
                 "--disable-dev-shm-usage"

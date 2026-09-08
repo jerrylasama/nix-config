@@ -2,7 +2,7 @@
 {
   den.aspects.toolchains = {
     homeManager =
-      { pkgs, ... }:
+      { config, pkgs, ... }:
       let
         llvm = pkgs.llvmPackages;
       in
@@ -38,6 +38,10 @@
           pkgs.perl
           pkgs.uv
         ];
+
+        home.sessionVariables = {
+          GRADLE_USER_HOME = "${config.xdg.cacheHome}/gradle";
+        };
       };
   };
 }
