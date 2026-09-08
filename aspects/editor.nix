@@ -7,9 +7,6 @@
         defaultEditor = true;
         plugins = with pkgs.vimPlugins; [
           lazy-nvim
-          LazyVim
-          nvim-lspconfig
-          conform-nvim
         ];
       };
 
