@@ -16,7 +16,7 @@ sudo nixos-rebuild switch --flake .#wsl
 ./scripts/verify.sh
 ```
 
-The `wsl` output installs the workstation tools, zsh, Neovim, language servers, Docker, Flutter and Android CLI tooling, and headless Playwright and Chromium tooling.
+The `wsl` output installs the workstation tools, zsh, Neovim, language servers, Docker, Flutter and Android CLI tooling, Ghidra and reverse-engineering tools, and headless Playwright and Chromium tooling.
 
 ## Windows helpers
 

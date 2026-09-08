@@ -7,6 +7,7 @@
         [
           radare2
           binwalk
+          ghidra
 
           android-tools
           apktool
