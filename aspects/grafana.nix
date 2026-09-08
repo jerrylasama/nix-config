@@ -1,10 +1,10 @@
-{ den, ... }:
+{ den, inputs, ... }:
 {
   den.aspects.grafana = {
     homeManager =
       { pkgs, ... }:
       {
-        home.packages = [ pkgs.gcx ];
+        home.packages = [ inputs.customPackages.${pkgs.system}.gcx ];
       };
   };
 }

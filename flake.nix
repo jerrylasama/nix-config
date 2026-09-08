@@ -88,6 +88,7 @@
           };
         in
         {
+          gcx = pkgs.callPackage ./packages/gcx { };
           playwright-cli = pkgs.callPackage ./packages/playwright-cli { };
         }
         // androidPackages
@@ -104,7 +105,7 @@
     den
     // {
       packages = lib.mapAttrs (_system: packages: {
-        inherit (packages) playwright-cli;
+        inherit (packages) gcx playwright-cli;
       }) customPackages;
       formatter = lib.genAttrs supportedSystems (system: inputs.nixpkgs.legacyPackages.${system}.nixfmt);
     };
