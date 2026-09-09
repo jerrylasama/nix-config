@@ -7,6 +7,8 @@
         gh
         tea
         deploy-rs
+        gnupg
+        rtk
 
         curl
         wget

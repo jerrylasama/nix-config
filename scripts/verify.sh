@@ -13,6 +13,7 @@ umask 077
 VERIFY_RUNTIME_DIR=$(mktemp -d "${TMPDIR:-/tmp}/nix-config-verify.XXXXXX")
 export GRADLE_USER_HOME="$VERIFY_RUNTIME_DIR/gradle"
 export FLUTTER_SUPPRESS_ANALYTICS=true
+export RTK_DB_PATH="$VERIFY_RUNTIME_DIR/rtk-history.db"
 export XDG_CACHE_HOME="$VERIFY_RUNTIME_DIR/cache"
 mkdir -p "$GRADLE_USER_HOME" "$XDG_CACHE_HOME"
 
@@ -64,6 +65,9 @@ check_tool git --version
 check_tool gh --version
 check_tool tea --version
 check_tool deploy --version
+check_tool gpg2 --version
+check_tool rtk --version
+check_tool rtk gain
 
 check_tool curl --version
 check_tool wget --version
