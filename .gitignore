@@ -31,6 +31,13 @@ Thumbs.db
 .nix-gcroots/
 lazy-lock.json.tmp
 
+# Machine inventories, logs, and WSL exports may contain local paths,
+# installed-software details, or entire home directories.
+windows-inventory/
+*.log
+*.tar
+*.vhdx
+
 # Credentials and private state that must stay outside this repository.
 .codex/
 .pi/

@@ -9,6 +9,7 @@ failures=0
 # These tools keep native state in the user's home directory by default. The
 # verifier must also work from CI and Nix sandboxes where that directory may be
 # read-only.
+umask 077
 VERIFY_RUNTIME_DIR=$(mktemp -d "${TMPDIR:-/tmp}/nix-config-verify.XXXXXX")
 export GRADLE_USER_HOME="$VERIFY_RUNTIME_DIR/gradle"
 export FLUTTER_SUPPRESS_ANALYTICS=true
@@ -153,7 +154,7 @@ if command -v ghidra-analyzeHeadless >/dev/null 2>&1; then
   if GHIDRA_MAXMEM=512M \
     GHIDRA_JAVA_OPTIONS="-Duser.home=$ghidra_runtime_dir" \
     ghidra-analyzeHeadless "$ghidra_project_dir" verify -import "$ghidra_target" \
-      -noanalysis -deleteProject >/tmp/nix-config-ghidra-headless.log 2>&1; then
+      -noanalysis -deleteProject >"$VERIFY_RUNTIME_DIR/ghidra-headless.log" 2>&1; then
     pass "ghidra-analyzeHeadless import"
   else
     fail "ghidra-analyzeHeadless import"
@@ -196,10 +197,10 @@ if command -v nvim >/dev/null 2>&1; then
 fi
 
 if command -v flutter >/dev/null 2>&1; then
-  if flutter doctor >/tmp/nix-config-flutter-doctor.log 2>&1; then
+  if flutter doctor >"$VERIFY_RUNTIME_DIR/flutter-doctor.log" 2>&1; then
     pass "flutter doctor"
   else
-    note "flutter doctor reported expected missing platform components; see /tmp/nix-config-flutter-doctor.log"
+    note "flutter doctor reported expected missing platform components; see $VERIFY_RUNTIME_DIR/flutter-doctor.log"
   fi
 fi
 
@@ -207,7 +208,7 @@ if command -v systemctl >/dev/null 2>&1 && systemctl is-system-running >/dev/nul
   if systemctl is-active --quiet docker; then
     pass "systemctl docker service is active"
   else
-    fail "systemctl docker service is active"
+    note "Docker daemon is not active; start it explicitly with sudo systemctl start docker"
   fi
 else
   note "systemd is not running in this session; Docker daemon service check skipped"
@@ -215,7 +216,7 @@ fi
 
 printf '\nRunning Playwright smoke test\n'
 browser_started=0
-if playwright-cli open https://example.com >/tmp/nix-config-playwright-open.log 2>&1; then
+if playwright-cli open https://example.com >"$VERIFY_RUNTIME_DIR/playwright-open.log" 2>&1; then
   browser_started=1
   pass "playwright-cli open https://example.com"
 else
@@ -223,13 +224,13 @@ else
 fi
 
 if [ "$browser_started" -eq 1 ]; then
-  if playwright-cli snapshot >/tmp/nix-config-playwright-snapshot.log 2>&1; then
+  if playwright-cli snapshot >"$VERIFY_RUNTIME_DIR/playwright-snapshot.log" 2>&1; then
     pass "playwright-cli snapshot"
   else
     fail "playwright-cli snapshot"
   fi
 
-  if playwright-cli close >/tmp/nix-config-playwright-close.log 2>&1; then
+  if playwright-cli close >"$VERIFY_RUNTIME_DIR/playwright-close.log" 2>&1; then
     pass "playwright-cli close"
   else
     fail "playwright-cli close"

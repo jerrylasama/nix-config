@@ -104,7 +104,7 @@
         "type": "github"
       }
     },
-    "nix-darwin": {
+    "darwin": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs"
@@ -167,7 +167,7 @@
         "deploy-rs": "deploy-rs",
         "home-manager": "home-manager",
         "import-tree": "import-tree",
-        "nix-darwin": "nix-darwin",
+        "darwin": "darwin",
         "nixos-wsl": "nixos-wsl",
         "nixpkgs": "nixpkgs"
       }

@@ -7,10 +7,9 @@
         pkgs.docker-compose
       ];
 
-      # This links the declarative Compose plugin without touching the user's
-      # Docker config, which may contain registry credentials.
-      home.file.".docker/cli-plugins/docker-compose".source =
-        "${pkgs.docker-compose}/libexec/docker/cli-plugins/docker-compose";
+      # Docker Desktop already manages ~/.docker/cli-plugins/docker-compose on
+      # macOS. Keep that machine-local symlink unmanaged; docker-compose is
+      # still available from home.packages above.
     };
 
     nixos = { pkgs, ... }: {

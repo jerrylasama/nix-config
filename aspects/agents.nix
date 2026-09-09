@@ -16,10 +16,8 @@
           service_tier = "default";
           plan_mode_reasoning_effort = "max";
 
-          projects."/path/to/nix-config" = {
-            trust_level = "trusted";
-          };
-
+          # Project trust is intentionally user-local: Codex keys this map by
+          # absolute checkout/worktree paths, which are not portable flake data.
           tui.status_line = [
             "model"
             "context-remaining"

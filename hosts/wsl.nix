@@ -56,20 +56,16 @@ in
         android_sdk.accept_license = true;
       };
 
-      users.manageLingering = true;
-      users.users.${detectedUser} = {
-        extraGroups = [ "docker" ];
-        linger = true;
-      };
-
       environment.systemPackages = [
         pkgs.docker
         pkgs.docker-compose
       ];
 
+      # Docker remains installed, but its daemon and root-equivalent
+      # docker-group access are opt-in on this shared configuration.
       virtualisation.docker = {
         enable = true;
-        enableOnBoot = true;
+        enableOnBoot = false;
       };
 
       system.stateVersion = "26.05";
@@ -80,19 +76,7 @@ in
     includes = [
       den.batteries.primary-user
       (den.batteries.user-shell "zsh")
-
-      den.aspects.common-cli
-      den.aspects.shell
-      den.aspects.editor
-      den.aspects.agents
-      den.aspects.toolchains
-      den.aspects.language-tools
-      den.aspects.browser-tools
-      den.aspects.grafana
-      den.aspects.reverse-engineering
-      den.aspects.network-tools
-      den.aspects.containers
-      den.aspects.mobile
+      den.aspects.workstation
     ];
   };
 }

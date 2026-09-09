@@ -17,9 +17,8 @@
             launchOptions = {
               executablePath = "${pkgs.chromium}/bin/chromium";
               headless = true;
-              chromiumSandbox = false;
+              chromiumSandbox = true;
               args = [
-                "--no-sandbox"
                 "--disable-dev-shm-usage"
               ];
             };
