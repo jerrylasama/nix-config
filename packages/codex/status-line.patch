@@ -1,0 +1,107 @@
+diff --git a/tui/src/chatwidget/status_controls.rs b/tui/src/chatwidget/status_controls.rs
+index 16bf87b..5763311 100644
+--- a/tui/src/chatwidget/status_controls.rs
++++ b/tui/src/chatwidget/status_controls.rs
+@@ -411,7 +411,11 @@ impl ChatWidget {
+     ) -> Option<String> {
+         let window = window?;
+         let remaining = (100.0f64 - window.used_percent).clamp(0.0f64, 100.0f64);
+-        Some(format!("{label} {remaining:.0}% left"))
++        let label = if label == "weekly" { "7d" } else { label };
++        Some(match window.resets_at.as_deref() {
++            Some(reset) => format!("{label}: {remaining:.0}% ({reset})"),
++            None => format!("{label}: {remaining:.0}%"),
++        })
+     }
+ 
+     pub(super) fn status_line_reasoning_effort_label(
+diff --git a/tui/src/chatwidget/status_surfaces.rs b/tui/src/chatwidget/status_surfaces.rs
+index b9b7685..ea03df4 100644
+--- a/tui/src/chatwidget/status_surfaces.rs
++++ b/tui/src/chatwidget/status_surfaces.rs
+@@ -711,6 +711,6 @@ impl ChatWidget {
+             StatusLineItem::ContextRemaining => self
+                 .status_line_context_remaining_percent()
+-                .map(|remaining| format!("Context {remaining}% left")),
++                .map(|remaining| format!("ctx {remaining}%")),
+             StatusLineItem::ContextUsed => self
+                 .status_line_context_used_percent()
+                 .map(|used| format!("Context {used}% used")),
+@@ -919,5 +919,9 @@ impl ChatWidget {
+     fn model_with_reasoning_display_name(&self) -> String {
+         let label = self.reasoning_display_name();
++        let model_display_name = self.model_display_name();
++        let model = model_display_name
++            .strip_prefix("gpt-")
++            .unwrap_or(model_display_name);
+         let service_tier_label = self
+             .current_service_tier()
+             .and_then(|service_tier| {
+@@ -930,7 +934,7 @@ impl ChatWidget {
+             .filter(|_| self.has_chatgpt_account)
+             .map(|tier| format!(" {tier}"))
+             .unwrap_or_default();
+-        format!("{} {label}{service_tier_label}", self.model_display_name())
++        format!("{model} ({label}){service_tier_label}")
+     }
+ 
+     /// Computes the compact runtime status label used by word-based status items.
+diff --git a/tui/src/status/helpers.rs b/tui/src/status/helpers.rs
+index 8dbe50c..1292ddf 100644
+--- a/tui/src/status/helpers.rs
++++ b/tui/src/status/helpers.rs
+@@ -189,6 +189,24 @@ pub(crate) fn format_reset_timestamp(dt: DateTime<Local>, captured_at: DateTime<L
+     }
+ }
+ 
++pub(crate) fn format_reset_countdown(
++    dt: DateTime<Local>,
++    captured_at: DateTime<Local>,
++) -> String {
++    let seconds = (dt - captured_at).num_seconds().max(0);
++    let days = seconds / 86_400;
++    let hours = (seconds % 86_400) / 3_600;
++    let minutes = (seconds % 3_600) / 60;
++
++    if days > 0 {
++        format!("{days}d{hours}h")
++    } else if hours > 0 {
++        format!("{hours}h{minutes:02}m")
++    } else {
++        format!("{minutes}m")
++    }
++}
++
+ fn title_case(s: &str) -> String {
+     if s.is_empty() {
+         return String::new();
+diff --git a/tui/src/status/rate_limits.rs b/tui/src/status/rate_limits.rs
+index 6377503..49e9f5e 100644
+--- a/tui/src/status/rate_limits.rs
++++ b/tui/src/status/rate_limits.rs
+@@ -9,6 +9,6 @@ use crate::chatwidget::limit_label_for_window;
+ use crate::text_formatting::capitalize_first;
+ 
+-use super::helpers::format_reset_timestamp;
++use super::helpers::{format_reset_countdown, format_reset_timestamp};
+ use chrono::DateTime;
+ use chrono::Duration as ChronoDuration;
+ use chrono::Local;
+@@ -67,7 +67,7 @@ pub(crate) const RATE_LIMIT_STALE_THRESHOLD_MINUTES: i64 = 15;
+ pub(crate) struct RateLimitWindowDisplay {
+     /// Percent used for the window.
+     pub used_percent: f64,
+-    /// Human-readable local reset time.
++    /// Compact duration until the window resets.
+     pub resets_at: Option<String>,
+     /// Window length in minutes when provided by the server.
+     pub window_minutes: Option<i64>,
+@@ -81,7 +81,7 @@ impl RateLimitWindowDisplay {
+             .resets_at
+             .and_then(|seconds| DateTime::<Utc>::from_timestamp(seconds, 0))
+             .map(|dt| dt.with_timezone(&Local));
+-        let resets_at = resets_at_utc.map(|dt| format_reset_timestamp(dt, captured_at));
++        let resets_at = resets_at_utc.map(|dt| format_reset_countdown(dt, captured_at));
+ 
+         Self {
+             used_percent: f64::from(window.used_percent),

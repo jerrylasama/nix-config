@@ -1,4 +1,4 @@
-{ den, ... }:
+{ den, inputs, ... }:
 {
   den.aspects.agents = {
     homeManager =
@@ -8,6 +8,7 @@
         ...
       }:
       let
+        codex = inputs.customPackages.${pkgs.system}.codex;
         codexSettings = {
           model = "gpt-5.6-luna";
           model_reasoning_effort = "max";
@@ -16,7 +17,7 @@
           plan_mode_reasoning_effort = "max";
 
           tui.status_line = [
-            "model"
+            "model-with-reasoning"
             "context-remaining"
             "five-hour-limit"
             "weekly-limit"
@@ -31,6 +32,7 @@
 
         programs.codex = {
           enable = true;
+          package = codex;
           # Codex writes project trust into config.toml itself. Let the activation
           # below own a mutable copy instead of linking this file into /nix/store.
           settings = null;
