@@ -4,6 +4,7 @@
     homeManager = { pkgs, ... }: {
       home.packages = with pkgs; [
         git
+        gitleaks
         gh
         tea
         deploy-rs
