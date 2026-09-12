@@ -24,6 +24,7 @@
         tree
         unzip
         zip
+        gnumake
         just
       ];
 
