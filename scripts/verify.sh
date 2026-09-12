@@ -30,6 +30,10 @@ note() {
   printf 'INFO  %s\n' "$1"
 }
 
+file_mode() {
+  stat -f '%Lp' "$1" 2>/dev/null || stat -c '%a' "$1"
+}
+
 run_probe() {
   local command_name=$1
   shift
@@ -85,7 +89,82 @@ check_tool zsh --version
 check_tool nvim --version
 
 check_tool codex --version
-check_tool pi --version
+check_tool dcg --version
+check_tool tirith --version
+
+printf '\nChecking Pi configuration and safety policy\n'
+pi_test_home="$VERIFY_RUNTIME_DIR/pi-home"
+mkdir -p "$pi_test_home/.pi/agent"
+if HOME="$pi_test_home" run_probe pi --version; then
+  pass "wrapped pi --version succeeds without secrets.env"
+else
+  fail "wrapped pi --version without secrets.env"
+fi
+
+pi_settings="$HOME/.pi/agent/settings.json"
+if [ -f "$pi_settings" ] && [ ! -L "$pi_settings" ] && [ "$(file_mode "$pi_settings")" = 600 ] && jq -e '
+  .defaultProvider == "hyper" and
+  .defaultModel == "glm-5.3-flash" and
+  .defaultThinkingLevel == "high" and
+  .enabledModels == ["hyper/*"] and
+  .defaultTools == ["read", "grep", "find", "ls", "bash", "edit", "write"] and
+  .packages == ["npm:@charmland/pi-hyper-provider@0.3.2"] and
+  .extensions == ["extensions/tirith-guard.ts", "extensions/dcg-guard.ts", "extensions/protected-path-guard.ts"] and
+  .enableInstallTelemetry == false and
+  .enableAnalytics == false and
+  .defaultProjectTrust == "ask" and
+  (.shellCommandPrefix | contains("HYPER_API_KEY")) and
+  (.shellCommandPrefix | contains("ANTHROPIC_API_KEY")) and
+  (.shellCommandPrefix | contains("OPENAI_API_KEY")) and
+  (.shellCommandPrefix | contains("AWS_SECRET_ACCESS_KEY")) and
+  (.shellCommandPrefix | contains("GOOGLE_APPLICATION_CREDENTIALS"))
+' "$pi_settings" >/dev/null; then
+  pass "Pi settings are owner-only and contain the declarative model, tools, package, and privacy policy"
+else
+  fail "Pi settings are missing or do not match the declarative policy"
+fi
+
+for pi_local_state in "$HOME/.pi/agent/auth.json" "$HOME/.pi/agent/secrets.env"; do
+  if [ -L "$pi_local_state" ]; then
+    case "$(readlink "$pi_local_state")" in
+      /nix/store/*) fail "$pi_local_state must not link into /nix/store" ;;
+      *) pass "$pi_local_state is not Nix-owned" ;;
+    esac
+  elif [ -e "$pi_local_state" ]; then
+    pass "$pi_local_state is local mutable state"
+  else
+    pass "$pi_local_state is absent and not Nix-owned"
+  fi
+done
+
+printf '%s\n' 'printf "PI_VERIFY_SECRET_SHOULD_NOT_RUN\n" >&2' > "$pi_test_home/.pi/agent/secrets.env"
+chmod 0644 "$pi_test_home/.pi/agent/secrets.env"
+if HOME="$pi_test_home" pi --version > "$VERIFY_RUNTIME_DIR/pi-insecure-secret.log" 2>&1 &&
+  grep -q 'ignoring .*secrets.env' "$VERIFY_RUNTIME_DIR/pi-insecure-secret.log" &&
+  ! grep -q 'PI_VERIFY_SECRET_SHOULD_NOT_RUN' "$VERIFY_RUNTIME_DIR/pi-insecure-secret.log"; then
+  pass "Pi rejects insecure secrets.env without evaluating or exposing it"
+else
+  fail "Pi did not safely reject insecure secrets.env"
+fi
+
+if node "$ROOT_DIR/scripts/test-pi-extensions.mjs" >/dev/null; then
+  pass "Pi extension safety tests"
+else
+  fail "Pi extension safety tests"
+fi
+
+if dcg --robot test "printf safe" >/dev/null 2>&1 &&
+  ! dcg --robot test "git reset --hard" >/dev/null 2>&1; then
+  pass "Destructive Command Guard allows safe commands and blocks destructive commands"
+else
+  fail "Destructive Command Guard decision smoke test"
+fi
+
+if ! tirith check --offline -- "echo payload | base64 -d | bash" >/dev/null 2>&1; then
+  pass "Tirith blocks an obfuscated execute chain"
+else
+  fail "Tirith decision smoke test"
+fi
 
 check_tool gcc --version
 check_tool clang --version

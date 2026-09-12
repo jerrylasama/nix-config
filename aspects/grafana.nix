@@ -4,7 +4,7 @@
     homeManager =
       { pkgs, ... }:
       {
-        home.packages = [ inputs.customPackages.${pkgs.system}.gcx ];
+        home.packages = [ inputs.customPackages.${pkgs.stdenv.hostPlatform.system}.gcx ];
       };
   };
 }

@@ -89,6 +89,7 @@
         in
         {
           codex = pkgs.callPackage ./packages/codex { };
+          dcg = pkgs.callPackage ./packages/dcg { };
           gcx = pkgs.callPackage ./packages/gcx { };
           playwright-cli = pkgs.callPackage ./packages/playwright-cli { };
         }
@@ -106,7 +107,12 @@
     den
     // {
       packages = lib.mapAttrs (_system: packages: {
-        inherit (packages) codex gcx playwright-cli;
+        inherit (packages)
+          codex
+          dcg
+          gcx
+          playwright-cli
+          ;
       }) customPackages;
       formatter = lib.genAttrs supportedSystems (system: inputs.nixpkgs.legacyPackages.${system}.nixfmt);
     };

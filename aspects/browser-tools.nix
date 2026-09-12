@@ -9,7 +9,7 @@
         ...
       }:
       let
-        playwrightCli = inputs.customPackages.${pkgs.system}.playwright-cli;
+        playwrightCli = inputs.customPackages.${pkgs.stdenv.hostPlatform.system}.playwright-cli;
         cliConfig = builtins.toJSON {
           browser = {
             browserName = "chromium";
