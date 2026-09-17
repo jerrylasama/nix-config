@@ -14,18 +14,30 @@ let
     else if loginUser != "" && loginUser != "root" then
       loginUser
     else
-      throw ''
-        Unable to determine the Darwin account from the evaluation environment.
-        Run darwin-rebuild with --impure so SUDO_USER or USER is available.
-      '';
+      null;
+
+  # Den collects aspect names while constructing every flake output. Use a
+  # harmless placeholder at that stage so pure evaluations of Linux hosts do
+  # not fail because the Darwin account is unavailable.
+  darwinUser = if detectedUser != null then detectedUser else "darwin-user";
 in
 {
   den.hosts.aarch64-darwin.macbook = {
-    users.${detectedUser}.classes = [ "homeManager" ];
+    users.${darwinUser}.classes = [ "homeManager" ];
   };
 
   den.aspects.macbook = {
     darwin = {
+      assertions = [
+        {
+          assertion = detectedUser != null;
+          message = ''
+            Unable to determine the Darwin account from the evaluation environment.
+            Run darwin-rebuild with --impure so SUDO_USER or USER is available.
+          '';
+        }
+      ];
+
       home-manager = {
         backupFileExtension = "before-nix-darwin";
         useGlobalPkgs = true;
@@ -42,7 +54,7 @@ in
     };
   };
 
-  den.aspects.${detectedUser} = {
+  den.aspects.${darwinUser} = {
     includes = [
       den.batteries.primary-user
       (den.batteries.user-shell "zsh")
