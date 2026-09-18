@@ -49,6 +49,17 @@
     darwin.system.stateVersion = 7;
     homeManager.home.stateVersion = "26.05";
 
+    # Required for flakes + the new CLI on every host. Applies to both
+    # NixOS-WSL and nix-darwin via the system-level nix settings.
+    nixos.nix.settings.experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
+    darwin.nix.settings.experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
+
     includes = [
       den.batteries.define-user
     ];
