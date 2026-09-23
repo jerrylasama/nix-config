@@ -3,6 +3,7 @@
   den.aspects.agents = {
     homeManager =
       {
+        config,
         lib,
         pkgs,
         ...
@@ -17,6 +18,22 @@
           ${lib.getExe pkgs.tirith} setup pi-cli --scope user --update-configs --force --quiet
           install -Dm755 "$HOME/.pi/agent/extensions/tirith-guard.ts" "$out"
         '';
+        # `tirith setup codex` wants codex on PATH (it registers the MCP server
+        # itself, then we throw that registration away). Only its gateway file
+        # is kept: the registration is declarative in codexSettings, and the
+        # shell hooks it also offers are deliberately left out.
+        tirithCodexGateway =
+          pkgs.runCommand "tirith-codex-gateway.yaml"
+            {
+              nativeBuildInputs = [ codex ];
+            }
+            ''
+              export HOME="$TMPDIR/tirith-home"
+              mkdir -p "$HOME"
+              ${lib.getExe pkgs.tirith} setup codex --scope user --update-configs --force --quiet
+              install -Dm644 "$HOME/.config/tirith/gateway.yaml" "$out"
+            '';
+        tirithGatewayConfig = "${config.home.homeDirectory}/.config/tirith/gateway.yaml";
         piSettings = {
           defaultProvider = "hyper";
           defaultModel = "glm-5.3-flash";
@@ -136,6 +153,23 @@
             "five-hour-limit"
             "weekly-limit"
           ];
+
+          # Agent-side tirith guard. The gateway proxies MCP tool calls, so it
+          # never sees codex's own shell tool; what it adds is tirith's check
+          # tools plus policy enforcement on any shell-shaped MCP tool.
+          mcp_servers."tirith-gateway" = {
+            command = lib.getExe pkgs.tirith;
+            args = [
+              "gateway"
+              "run"
+              "--upstream-bin"
+              (lib.getExe pkgs.tirith)
+              "--upstream-arg"
+              "mcp-server"
+              "--config"
+              tirithGatewayConfig
+            ];
+          };
         };
         codexSettingsJson = (pkgs.formats.json { }).generate "codex-settings.json" codexSettings;
       in
@@ -143,6 +177,8 @@
         home.packages = [
           dcg
           piWrapped
+          # Agent-only guard. No tirith shell hooks: they intercept interactive
+          # input, so they would gate the human's prompt and miss every agent.
           pkgs.tirith
         ];
 
@@ -153,6 +189,7 @@
           ".pi/agent/extensions/protected-path-guard.ts".source =
             ../dotfiles/pi/extensions/protected-path-guard.ts;
           ".pi/agent/secrets.env.example".source = ../dotfiles/pi/secrets.env.example;
+          ".config/tirith/gateway.yaml".source = tirithCodexGateway;
         };
 
         programs.codex = {
