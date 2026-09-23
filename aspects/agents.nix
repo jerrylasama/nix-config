@@ -183,7 +183,6 @@
         ];
 
         home.file = {
-          ".agents/skills/unslop/SKILL.md".source = ../dotfiles/pi/skills/unslop/SKILL.md;
           ".pi/agent/extensions/tirith-guard.ts".source = tirithPiExtension;
           ".pi/agent/extensions/dcg-guard.ts".source = ../dotfiles/pi/extensions/dcg-guard.ts;
           ".pi/agent/extensions/protected-path-guard.ts".source =
