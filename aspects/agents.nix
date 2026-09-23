@@ -11,28 +11,19 @@
       let
         codex = inputs.customPackages.${pkgs.stdenv.hostPlatform.system}.codex;
         dcg = inputs.customPackages.${pkgs.stdenv.hostPlatform.system}.dcg;
+        tirith = inputs.customPackages.${pkgs.stdenv.hostPlatform.system}.tirith;
         pi = pkgs.pi-coding-agent;
-        tirithPiExtension = pkgs.runCommand "tirith-pi-extension.ts" { } ''
-          export HOME="$TMPDIR/tirith-home"
-          mkdir -p "$HOME"
-          ${lib.getExe pkgs.tirith} setup pi-cli --scope user --update-configs --force --quiet
-          install -Dm755 "$HOME/.pi/agent/extensions/tirith-guard.ts" "$out"
-        '';
-        # `tirith setup codex` wants codex on PATH (it registers the MCP server
-        # itself, then we throw that registration away). Only its gateway file
-        # is kept: the registration is declarative in codexSettings, and the
-        # shell hooks it also offers are deliberately left out.
-        tirithCodexGateway =
-          pkgs.runCommand "tirith-codex-gateway.yaml"
-            {
-              nativeBuildInputs = [ codex ];
-            }
-            ''
-              export HOME="$TMPDIR/tirith-home"
-              mkdir -p "$HOME"
-              ${lib.getExe pkgs.tirith} setup codex --scope user --update-configs --force --quiet
-              install -Dm644 "$HOME/.config/tirith/gateway.yaml" "$out"
-            '';
+        # tirith's setup generator refuses to run in a nix build sandbox: its
+        # anti-tampering check reads the store binary as owned by uid 65534
+        # under the sandbox user-namespace mapping. Both generated files are
+        # vendored instead. Re-vendor them when the pinned version in
+        # packages/tirith changes:
+        #   tirith setup pi-cli --scope user --update-configs --force --quiet
+        #   tirith setup codex  --scope user --update-configs --force --quiet
+        # The pi extension is generated with TIRITH_BIN set to the store path;
+        # it is kept as a PATH lookup so it works from home.packages.
+        tirithPiExtension = ../dotfiles/pi/extensions/tirith-guard.ts;
+        tirithCodexGateway = ../dotfiles/tirith/gateway.yaml;
         tirithGatewayConfig = "${config.home.homeDirectory}/.config/tirith/gateway.yaml";
         piSettings = {
           defaultProvider = "hyper";
@@ -180,12 +171,12 @@
           # never sees codex's own shell tool; what it adds is tirith's check
           # tools plus policy enforcement on any shell-shaped MCP tool.
           mcp_servers."tirith-gateway" = {
-            command = lib.getExe pkgs.tirith;
+            command = lib.getExe tirith;
             args = [
               "gateway"
               "run"
               "--upstream-bin"
-              (lib.getExe pkgs.tirith)
+              (lib.getExe tirith)
               "--upstream-arg"
               "mcp-server"
               "--config"
@@ -201,7 +192,7 @@
           piWrapped
           # Agent-only guard. No tirith shell hooks: they intercept interactive
           # input, so they would gate the human's prompt and miss every agent.
-          pkgs.tirith
+          tirith
         ];
 
         home.file = {

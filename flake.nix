@@ -92,6 +92,7 @@
           dcg = pkgs.callPackage ./packages/dcg { };
           gcx = pkgs.callPackage ./packages/gcx { };
           playwright-cli = pkgs.callPackage ./packages/playwright-cli { };
+          tirith = pkgs.callPackage ./packages/tirith { };
         }
         // androidPackages
       );
@@ -112,6 +113,7 @@
           dcg
           gcx
           playwright-cli
+          tirith
           ;
       }) customPackages;
       formatter = lib.genAttrs supportedSystems (system: inputs.nixpkgs.legacyPackages.${system}.nixfmt);
