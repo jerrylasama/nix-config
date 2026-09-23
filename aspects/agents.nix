@@ -103,11 +103,10 @@
           '';
 
           packages = [
-            "npm:@charmland/pi-hyper-provider@0.3.2"
+            "git:git@gitlab.com:jlasama-lab/pi-extensions.git"
             "npm:pi-clear@0.1.1"
             "npm:pi-web-access@0.29.0"
             "npm:pi-subagents@0.67.0"
-            "npm:@juicesharp/rpiv-ask-user-question@2.10.0"
           ];
           extensions = [
             "extensions/tirith-guard.ts"
@@ -137,7 +136,30 @@
             fi
             unset permissions secrets_file
 
-            exec ${lib.getExe pi} "$@"
+            status=0
+            ${lib.getExe pi} "$@" || status=$?
+
+            # Pi keys packages by source, so the git install and a local
+            # checkout are two packages. Both load, and their bundled tools
+            # collide, which aborts startup before any extension can react.
+            # After an install, keep the checkout this machine works in and
+            # drop the other registration. On a development host that is the
+            # working tree under ~/src; elsewhere it is the git clone, which
+            # only exists once the install above created it.
+            if [ "''${1:-}" = "install" ]; then
+              guard=""
+              for candidate in "''${PI_EXTENSIONS_ROOT:-}" "$HOME/src/pi-extensions" "$HOME/.pi/agent/git/gitlab.com/jlasama-lab/pi-extensions"; do
+                if [ -n "$candidate" ] && [ -f "$candidate/tools/sync-packages.mjs" ]; then
+                  guard="$candidate/tools/sync-packages.mjs"
+                  break
+                fi
+              done
+              if [ -n "$guard" ]; then
+                ${lib.getExe pkgs.nodejs} "$guard" --fix || true
+              fi
+            fi
+
+            exit "$status"
           '';
         };
         codexSettings = {
