@@ -51,4 +51,13 @@ assert.equal((await protectedPath({ toolName: "read", input: { path: "secrets.en
 assert.equal(await protectedPath({ toolName: "bash", input: { command: "cat ~/.aws/credentials" } }, context({ confirm: true })), undefined);
 assert.equal((await protectedPath({ toolName: "bash", input: { command: "echo token > ~/.aws/credentials" } }, context())).block, true);
 
+// Read-only access to a protected path prompts instead of hard-blocking when the
+// only redirection is an fd duplication or a discard.
+assert.equal(await protectedPath({ toolName: "bash", input: { command: "ls -d /work/project/.git 2>/dev/null" } }, context({ confirm: true })), undefined);
+assert.equal(await protectedPath({ toolName: "bash", input: { command: "cat ~/.aws/credentials 2>&1" } }, context({ confirm: true })), undefined);
+assert.equal((await protectedPath({ toolName: "bash", input: { command: "ls -d /work/project/.git 2>/dev/null" } }, context({ confirm: false }))).block, true);
+// A real write to the same path still hard-blocks, prompt or not.
+assert.equal((await protectedPath({ toolName: "bash", input: { command: "echo x > /work/project/.git/config" } }, context({ confirm: true }))).block, true);
+assert.equal((await protectedPath({ toolName: "bash", input: { command: "sed -i s/a/b/ ~/.aws/credentials" } }, context({ confirm: true }))).block, true);
+
 console.log("Pi extension safety tests passed");

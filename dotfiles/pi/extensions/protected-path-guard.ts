@@ -73,8 +73,18 @@ function shellProtectedReason(command: string, cwd: string, home: string): strin
   return undefined;
 }
 
+const MUTATING_COMMAND = /(?:^|[;&|]\s*|\b)(?:rm|mv|cp|install|touch|mkdir|rmdir|truncate|tee|chmod|chown|chgrp|shred)\b|(?:^|\s)(?:sed|perl)\s+[^\n;&|]*-[A-Za-z]*i/i;
+// A write redirection counts as a mutation, but fd duplication (`2>&1`, `>&2`)
+// and discarding output (`2>/dev/null`) do not. Treating those as writes made
+// read-only commands that mention a protected path, such as
+// `ls -d repo/.git 2>/dev/null`, hard-block instead of prompting.
+const WRITE_REDIRECT = /(?:^|[^<])>{1,2}(?!>)/;
+const BENIGN_REDIRECT = /\d?\s*>\s*&\s*\d/g;
+const DISCARD_REDIRECT = /\d?\s*>{1,2}\s*["']?\/dev\/null["']?/g;
+
 export function shellMutatesProtectedPath(command: string): boolean {
-  return /(?:^|[;&|]\s*|\b)(?:rm|mv|cp|install|touch|mkdir|rmdir|truncate|tee|chmod|chown|chgrp|shred)\b|(?:^|\s)(?:sed|perl)\s+[^\n;&|]*-[A-Za-z]*i|(?:^|[^<])>{1,2}(?!>)/i.test(command);
+  const stripped = command.replace(BENIGN_REDIRECT, " ").replace(DISCARD_REDIRECT, " ");
+  return MUTATING_COMMAND.test(stripped) || WRITE_REDIRECT.test(stripped);
 }
 
 export default function protectedPathGuard(pi: ExtensionAPI): void {
