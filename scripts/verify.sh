@@ -30,8 +30,11 @@ note() {
   printf 'INFO  %s\n' "$1"
 }
 
+# GNU stat takes -c, BSD/macOS stat takes -f. Try GNU first: `stat -f` on GNU
+# prints a filesystem dump to stdout before failing, which poisons the command
+# substitution even with the `||` fallback.
 file_mode() {
-  stat -f '%Lp' "$1" 2>/dev/null || stat -c '%a' "$1"
+  stat -c '%a' "$1" 2>/dev/null || stat -f '%Lp' "$1" 2>/dev/null
 }
 
 run_probe() {
@@ -108,7 +111,7 @@ if [ -f "$pi_settings" ] && [ ! -L "$pi_settings" ] && [ "$(file_mode "$pi_setti
   .defaultThinkingLevel == "high" and
   .enabledModels == ["hyper/*"] and
   .defaultTools == ["read", "grep", "find", "ls", "bash", "edit", "write"] and
-  .packages == ["npm:@charmland/pi-hyper-provider@0.3.2"] and
+  .packages == ["git:git@gitlab.com:jlasama-lab/pi-extensions.git", "npm:pi-clear@0.1.1", "npm:pi-web-access@0.29.0", "npm:pi-subagents@0.67.0"] and
   .extensions == ["extensions/tirith-guard.ts", "extensions/dcg-guard.ts", "extensions/protected-path-guard.ts"] and
   .enableInstallTelemetry == false and
   .enableAnalytics == false and
@@ -119,7 +122,7 @@ if [ -f "$pi_settings" ] && [ ! -L "$pi_settings" ] && [ "$(file_mode "$pi_setti
   (.shellCommandPrefix | contains("AWS_SECRET_ACCESS_KEY")) and
   (.shellCommandPrefix | contains("GOOGLE_APPLICATION_CREDENTIALS"))
 ' "$pi_settings" >/dev/null; then
-  pass "Pi settings are owner-only and contain the declarative model, tools, package, and privacy policy"
+  pass "Pi settings are owner-only and contain the declarative model, tools, packages, and privacy policy"
 else
   fail "Pi settings are missing or do not match the declarative policy"
 fi
