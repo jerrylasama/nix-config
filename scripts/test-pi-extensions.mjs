@@ -24,6 +24,9 @@ function context({ hasUI = true, confirm = true } = {}) {
 const dcg = loadHandler(dcgGuard);
 assert.equal(await dcg({ toolName: "bash", input: { command: "printf safe" } }, context()), undefined);
 assert.equal((await dcg({ toolName: "bash", input: { command: "git reset --hard" } }, context())).block, true);
+assert.equal((await dcg({ toolName: "bash", input: { command: "rm -rf /" } }, context())).block, true);
+assert.equal(await dcg({ toolName: "bash", input: { command: "nix build .#wsl" } }, context()), undefined);
+assert.equal(await dcg({ toolName: "bash", input: { command: "nixos-rebuild switch --flake .#wsl" } }, context()), undefined);
 
 const tirithExtensionPath = process.env.TIRITH_EXTENSION_PATH ?? join(homedir(), ".pi/agent/extensions/tirith-guard.ts");
 assert.equal(existsSync(tirithExtensionPath), true, `missing generated Tirith extension: ${tirithExtensionPath}`);

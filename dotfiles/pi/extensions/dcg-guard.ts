@@ -1,5 +1,11 @@
 // Pi integration recipe maintained by destructive_command_guard:
 // https://github.com/Dicklesworthstone/destructive_command_guard/blob/v0.14.3/docs/pi-integration.md
+// Local patch: the spawn below adds --dialect posix. The pi bash tool only ever
+// executes bash, and dcg's default all-dialect mode denies harmless Nix flake
+// refs such as `nix build .#wsl` with "PowerShell substitution contains comment
+// syntax that dcg cannot statically disambiguate" (posix_would_allow: true).
+// Destructive bash commands (git reset --hard, rm -rf /, force push) are still
+// denied under the posix dialect.
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { spawn } from "node:child_process";
 
@@ -17,7 +23,7 @@ export function dcgDecision(command: string): Promise<{ deny: boolean; reason: s
 
     let child;
     try {
-      child = spawn(DCG_BIN, ["--robot", "test", command], {
+      child = spawn(DCG_BIN, ["--robot", "test", "--dialect", "posix", command], {
         stdio: ["ignore", "pipe", "ignore"],
       });
     } catch {
