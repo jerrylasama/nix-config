@@ -153,11 +153,21 @@ else
   fail "Pi extension safety tests"
 fi
 
-if dcg --robot test "printf safe" >/dev/null 2>&1 &&
-  ! dcg --robot test "git reset --hard" >/dev/null 2>&1; then
+# The pi bash tool analyzes commands in the posix dialect, so verify the guard
+# the way it is actually invoked.
+if dcg --robot test --dialect posix "printf safe" >/dev/null 2>&1 &&
+  ! dcg --robot test --dialect posix "git reset --hard" >/dev/null 2>&1; then
   pass "Destructive Command Guard allows safe commands and blocks destructive commands"
 else
   fail "Destructive Command Guard decision smoke test"
+fi
+
+# All-dialect analysis reads an unquoted flake ref as a PowerShell comment and
+# denies it, which is why the guard pins the dialect. Catch a regression here.
+if dcg --robot test --dialect posix "nix build .#wsl" >/dev/null 2>&1; then
+  pass "Destructive Command Guard allows unquoted Nix flake refs"
+else
+  fail "Destructive Command Guard blocked an unquoted Nix flake ref"
 fi
 
 if ! tirith check --offline -- "echo payload | base64 -d | bash" >/dev/null 2>&1; then
