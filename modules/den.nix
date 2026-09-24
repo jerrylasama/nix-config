@@ -12,6 +12,7 @@
     ../hosts/darwin.nix
 
     ../aspects/common-cli.nix
+    ../aspects/secrets.nix
     ../aspects/shell.nix
     ../aspects/editor.nix
     ../aspects/agents.nix
@@ -30,6 +31,7 @@
   den.aspects.workstation = {
     includes = [
       den.aspects.common-cli
+      den.aspects.secrets
       den.aspects.shell
       den.aspects.editor
       den.aspects.agents

@@ -11,6 +11,11 @@
         gnupg
         rtk
 
+        # Secrets management (sops-nix uses age by default)
+        sops
+        age
+        age-plugin-yubikey
+
         curl
         wget
 
