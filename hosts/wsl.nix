@@ -36,6 +36,9 @@ in
       networking.hostName = "wsl";
 
       home-manager = {
+        # Back up stray files instead of failing the activation, so a dangling
+        # leftover cannot clobber the rebuild. Mirrors hosts/darwin.nix.
+        backupFileExtension = "before-nixos";
         useGlobalPkgs = true;
         useUserPackages = true;
       };
