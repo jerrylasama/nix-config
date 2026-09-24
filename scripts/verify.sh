@@ -111,7 +111,7 @@ if [ -f "$pi_settings" ] && [ ! -L "$pi_settings" ] && [ "$(file_mode "$pi_setti
   .defaultThinkingLevel == "high" and
   .enabledModels == ["hyper/*"] and
   .defaultTools == ["read", "grep", "find", "ls", "bash", "edit", "write"] and
-  .packages == ["git:git@gitlab.com:jlasama-lab/pi-extensions.git", "npm:pi-clear@0.1.1", "npm:pi-web-access@0.29.0", "npm:pi-subagents@0.67.0"] and
+  .packages == ["git:git@gitlab.com:jlasama-lab/pi-extensions.git"] and
   .extensions == ["extensions/tirith-guard.ts", "extensions/dcg-guard.ts", "extensions/protected-path-guard.ts"] and
   .enableInstallTelemetry == false and
   .enableAnalytics == false and
