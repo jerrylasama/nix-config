@@ -95,6 +95,14 @@ check_tool codex --version
 check_tool dcg --version
 check_tool tirith --version
 
+printf '\nChecking repository shell scripts\n'
+check_tool shellcheck --version
+if shellcheck scripts/*.sh; then
+  pass "shellcheck scripts/*.sh"
+else
+  fail "shellcheck scripts/*.sh"
+fi
+
 printf '\nChecking Pi configuration and safety policy\n'
 pi_test_home="$VERIFY_RUNTIME_DIR/pi-home"
 mkdir -p "$pi_test_home/.pi/agent"
