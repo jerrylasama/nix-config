@@ -12,6 +12,7 @@ check_tool gpg2 --version
 check_tool sops --version
 check_tool age --version
 check_tool age-plugin-yubikey --version
+check_tool gitleaks version
 check_tool rtk --version
 check_tool rtk gain
 
