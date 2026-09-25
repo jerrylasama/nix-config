@@ -44,6 +44,10 @@
             python-downloads = "automatic";
             python-preference = "only-managed";
           };
+          python = {
+            versions = [ "3.13" ];
+            default = [ "3.13" ];
+          };
         };
 
         home.sessionVariables = {
