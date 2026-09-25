@@ -25,82 +25,9 @@
         tirithPiExtension = ../dotfiles/pi/extensions/tirith-guard.ts;
         tirithCodexGateway = ../dotfiles/tirith/gateway.yaml;
         tirithGatewayConfig = "${config.home.homeDirectory}/.config/tirith/gateway.yaml";
-        piSettings = {
-          defaultProvider = "hyper";
-          defaultModel = "glm-5.3-flash";
-          defaultThinkingLevel = "high";
-          enabledModels = [ "hyper/*" ];
-          defaultTools = [
-            "read"
-            "grep"
-            "find"
-            "ls"
-            "bash"
-            "edit"
-            "write"
-          ];
-
-          theme = "dark";
-          tuiMode = "regular";
-          quietStartup = false;
-          defaultProjectTrust = "ask";
-          enableInstallTelemetry = false;
-          enableAnalytics = false;
-
-          doubleEscapeAction = "tree";
-          treeFilterMode = "default";
-          compaction = {
-            enabled = true;
-            reserveTokens = 16384;
-            keepRecentTokens = 20000;
-          };
-          branchSummary = {
-            reserveTokens = 16384;
-            skipPrompt = false;
-          };
-          retry = {
-            enabled = true;
-            maxRetries = 3;
-            baseDelayMs = 2000;
-            maxAgentDelayMs = 60000;
-            provider = {
-              timeoutMs = 3600000;
-              maxRetries = 0;
-              maxRetryDelayMs = 60000;
-            };
-          };
-          steeringMode = "one-at-a-time";
-          followUpMode = "one-at-a-time";
-          transport = "auto";
-          httpIdleTimeoutMs = 300000;
-          websocketConnectTimeoutMs = 15000;
-          terminal = {
-            showImages = true;
-            imageWidthCells = 60;
-            clearOnShrink = false;
-            hyperlinks = "auto";
-            images = "auto";
-            trueColor = "auto";
-          };
-          images = {
-            autoResize = true;
-            blockImages = false;
-          };
-
-          # Keep credentials in Pi's provider process, but remove every
-          # documented provider credential from agent-generated shells.
-          shellCommandPrefix = ''
-            unset ANTHROPIC_API_KEY ANT_LING_API_KEY AZURE_OPENAI_API_KEY OPENAI_API_KEY DEEPSEEK_API_KEY NVIDIA_API_KEY GEMINI_API_KEY AWS_BEARER_TOKEN_BEDROCK MISTRAL_API_KEY GROQ_API_KEY CEREBRAS_API_KEY CLOUDFLARE_API_KEY CLOUDFLARE_ACCOUNT_ID CLOUDFLARE_GATEWAY_ID XAI_API_KEY OPENROUTER_API_KEY AI_GATEWAY_API_KEY ZAI_API_KEY ZAI_CODING_CN_API_KEY OPENCODE_API_KEY RADIUS_API_KEY HF_TOKEN FIREWORKS_API_KEY TOGETHER_API_KEY BASETEN_API_KEY KIMI_API_KEY MINIMAX_API_KEY MINIMAX_CN_API_KEY QWEN_TOKEN_PLAN_API_KEY QWEN_TOKEN_PLAN_CN_API_KEY XIAOMI_API_KEY XIAOMI_TOKEN_PLAN_CN_API_KEY XIAOMI_TOKEN_PLAN_AMS_API_KEY XIAOMI_TOKEN_PLAN_SGP_API_KEY HYPER_API_KEY AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_PROFILE AWS_WEB_IDENTITY_TOKEN_FILE AWS_CONTAINER_CREDENTIALS_FULL_URI AWS_CONTAINER_CREDENTIALS_RELATIVE_URI AWS_CONTAINER_AUTHORIZATION_TOKEN AWS_CONTAINER_AUTHORIZATION_TOKEN_FILE GOOGLE_APPLICATION_CREDENTIALS
-          '';
-
-          packages = [ "git:git@gitlab.com:jlasama-lab/pi-extensions.git" ];
-          extensions = [
-            "extensions/tirith-guard.ts"
-            "extensions/dcg-guard.ts"
-            "extensions/protected-path-guard.ts"
-          ];
-        };
-        piSettingsJson = (pkgs.formats.json { }).generate "pi-settings.json" piSettings;
+        # Single source of truth for Pi's deployed settings.json. Byte-compared
+        # against the deployed file by scripts/verify.sh.
+        piSettingsJson = ../dotfiles/pi/settings.json;
         piWrapped = pkgs.writeShellApplication {
           name = "pi";
           text = ''
@@ -244,7 +171,7 @@
 
           temporary="$(mktemp "$pi_dir/.settings.json.home-manager.XXXXXX")"
           trap 'rm -f -- "$temporary"' EXIT
-          cat ${lib.escapeShellArg piSettingsJson} > "$temporary"
+          cat ${piSettingsJson} > "$temporary"
           run chmod 600 "$temporary"
           run mv -f -- "$temporary" "$settings_path"
           trap - EXIT

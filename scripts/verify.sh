@@ -117,26 +117,13 @@ else
 fi
 
 pi_settings="$HOME/.pi/agent/settings.json"
-if [ -f "$pi_settings" ] && [ ! -L "$pi_settings" ] && [ "$(file_mode "$pi_settings")" = 600 ] && jq -e '
-  .defaultProvider == "hyper" and
-  .defaultModel == "glm-5.3-flash" and
-  .defaultThinkingLevel == "high" and
-  .enabledModels == ["hyper/*"] and
-  .defaultTools == ["read", "grep", "find", "ls", "bash", "edit", "write"] and
-  .packages == ["git:git@gitlab.com:jlasama-lab/pi-extensions.git"] and
-  .extensions == ["extensions/tirith-guard.ts", "extensions/dcg-guard.ts", "extensions/protected-path-guard.ts"] and
-  .enableInstallTelemetry == false and
-  .enableAnalytics == false and
-  .defaultProjectTrust == "ask" and
-  (.shellCommandPrefix | contains("HYPER_API_KEY")) and
-  (.shellCommandPrefix | contains("ANTHROPIC_API_KEY")) and
-  (.shellCommandPrefix | contains("OPENAI_API_KEY")) and
-  (.shellCommandPrefix | contains("AWS_SECRET_ACCESS_KEY")) and
-  (.shellCommandPrefix | contains("GOOGLE_APPLICATION_CREDENTIALS"))
-' "$pi_settings" >/dev/null; then
-  pass "Pi settings are owner-only and contain the declarative model, tools, packages, and privacy policy"
+# Byte-compare against the single source of truth in the repo; the deployed
+# file is written from it by aspects/agents.nix (chmod 600, no symlink).
+if [ -f "$pi_settings" ] && [ ! -L "$pi_settings" ] && [ "$(file_mode "$pi_settings")" = 600 ] &&
+  cmp -s "$pi_settings" "$ROOT_DIR/dotfiles/pi/settings.json"; then
+  pass "Pi settings are owner-only and match dotfiles/pi/settings.json"
 else
-  fail "Pi settings are missing or do not match the declarative policy"
+  fail "Pi settings are missing, not owner-only, or do not match dotfiles/pi/settings.json (run just rebuild)"
 fi
 
 for pi_local_state in "$HOME/.pi/agent/auth.json" "$HOME/.pi/agent/secrets.env"; do
