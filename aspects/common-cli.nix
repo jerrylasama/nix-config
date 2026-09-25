@@ -32,6 +32,7 @@
         zip
         gnumake
         just
+        shellcheck
       ];
 
       programs.git = {
