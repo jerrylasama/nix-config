@@ -45,8 +45,8 @@
             python-preference = "only-managed";
           };
           python = {
-            versions = [ "3.13" ];
-            default = [ "3.13" ];
+            versions = [ "3.14.7" ];
+            default = [ "3.14.7" ];
           };
         };
 
