@@ -13,7 +13,7 @@ extensions:
 
 # Rebuild and activate a host: `just rebuild <host> [action]`; see docs/JUSTFILE.md.
 rebuild host action="switch":
-	./scripts/rebuild.sh {{ host }} {{ action }}
+	./scripts/rebuild.sh {{ quote(host) }} {{ quote(action) }}
 
 # Update flake.lock to the latest pinned inputs and commit the change.
 # Follow up with `just rebuild wsl` or `just rebuild darwin` on the target host.
