@@ -25,7 +25,7 @@ Rebuilds run locally on the target machine; they are not cross-host deploys. Run
 
 ## Upgrading
 
-`just upgrade` updates `flake.lock` to the latest pinned inputs and commits the change:
+`just upgrade` updates `flake.lock` to the latest pinned inputs and commits the change; without `just`, run `nix flake update --commit-lock-file`:
 
 ```bash
 just upgrade

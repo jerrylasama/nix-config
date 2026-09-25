@@ -1,5 +1,5 @@
 {
-  description = "Portable Nix development workstation for NixOS-WSL, NixOS, and Darwin";
+  description = "Portable Nix development workstation for NixOS-WSL and Darwin";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
