@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Thin driver: shared setup and helpers, then the sourced check modules in
+# scripts/verify/ run in a fixed order, then the summary. Do not run modules
+# directly; they share this shell's state and strictness.
 set -Eeuo pipefail
 
 ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
@@ -66,277 +69,24 @@ check_tool() {
   fi
 }
 
-printf 'Checking Nix workstation commands\n'
+# Each module relies on the helpers and state above; the list order is the
+# execution order and must not change.
+verify_modules=(
+  core-tools
+  repo-scripts
+  pi
+  toolchains
+  analysis-tools
+  network-tools
+  containers
+  editors
+  smoke
+)
 
-check_tool git --version
-check_tool gh --version
-check_tool tea --version
-check_tool deploy --version
-check_tool ansible --version
-check_tool gpg2 --version
-check_tool sops --version
-check_tool age --version
-check_tool age-plugin-yubikey --version
-check_tool rtk --version
-check_tool rtk gain
-
-check_tool curl --version
-check_tool wget --version
-check_tool jq --version
-check_tool yq --version
-check_tool rg --version
-check_tool fd --version
-check_tool fzf --version
-check_tool tree --version
-check_tool unzip -v
-check_tool zip -v
-check_tool just --version
-
-check_tool zsh --version
-check_tool nvim --version
-
-check_tool codex --version
-check_tool dcg --version
-check_tool tirith --version
-
-printf '\nChecking repository shell scripts\n'
-check_tool shellcheck --version
-if shellcheck scripts/*.sh; then
-  pass "shellcheck scripts/*.sh"
-else
-  fail "shellcheck scripts/*.sh"
-fi
-
-printf '\nChecking Pi configuration and safety policy\n'
-pi_test_home="$VERIFY_RUNTIME_DIR/pi-home"
-mkdir -p "$pi_test_home/.pi/agent"
-if HOME="$pi_test_home" run_probe pi --version; then
-  pass "wrapped pi --version succeeds without secrets.env"
-else
-  fail "wrapped pi --version without secrets.env"
-fi
-
-pi_settings="$HOME/.pi/agent/settings.json"
-# Byte-compare against the single source of truth in the repo; the deployed
-# file is written from it by aspects/agents.nix (chmod 600, no symlink).
-if [ -f "$pi_settings" ] && [ ! -L "$pi_settings" ] && [ "$(file_mode "$pi_settings")" = 600 ] &&
-  cmp -s "$pi_settings" "$ROOT_DIR/dotfiles/pi/settings.json"; then
-  pass "Pi settings are owner-only and match dotfiles/pi/settings.json"
-else
-  fail "Pi settings are missing, not owner-only, or do not match dotfiles/pi/settings.json (run just rebuild)"
-fi
-
-for pi_local_state in "$HOME/.pi/agent/auth.json" "$HOME/.pi/agent/secrets.env"; do
-  if [ -L "$pi_local_state" ]; then
-    case "$(readlink "$pi_local_state")" in
-      /nix/store/*) fail "$pi_local_state must not link into /nix/store" ;;
-      *) pass "$pi_local_state is not Nix-owned" ;;
-    esac
-  elif [ -e "$pi_local_state" ]; then
-    pass "$pi_local_state is local mutable state"
-  else
-    pass "$pi_local_state is absent and not Nix-owned"
-  fi
+for module_name in "${verify_modules[@]}"; do
+  # shellcheck source=scripts/verify/core-tools.sh
+  source "$ROOT_DIR/scripts/verify/$module_name.sh"
 done
-
-printf '%s\n' 'printf "PI_VERIFY_SECRET_SHOULD_NOT_RUN\n" >&2' > "$pi_test_home/.pi/agent/secrets.env"
-chmod 0644 "$pi_test_home/.pi/agent/secrets.env"
-if HOME="$pi_test_home" pi --version > "$VERIFY_RUNTIME_DIR/pi-insecure-secret.log" 2>&1 &&
-  grep -q 'ignoring .*secrets.env' "$VERIFY_RUNTIME_DIR/pi-insecure-secret.log" &&
-  ! grep -q 'PI_VERIFY_SECRET_SHOULD_NOT_RUN' "$VERIFY_RUNTIME_DIR/pi-insecure-secret.log"; then
-  pass "Pi rejects insecure secrets.env without evaluating or exposing it"
-else
-  fail "Pi did not safely reject insecure secrets.env"
-fi
-
-if node "$ROOT_DIR/scripts/test-pi-extensions.mjs" >/dev/null; then
-  pass "Pi extension safety tests"
-else
-  fail "Pi extension safety tests"
-fi
-
-# The pi bash tool analyzes commands in the posix dialect, so verify the guard
-# the way it is actually invoked.
-if dcg --robot test --dialect posix "printf safe" >/dev/null 2>&1 &&
-  ! dcg --robot test --dialect posix "git reset --hard" >/dev/null 2>&1; then
-  pass "Destructive Command Guard allows safe commands and blocks destructive commands"
-else
-  fail "Destructive Command Guard decision smoke test"
-fi
-
-# All-dialect analysis reads an unquoted flake ref as a PowerShell comment and
-# denies it, which is why the guard pins the dialect. Catch a regression here.
-if dcg --robot test --dialect posix "nix build .#wsl" >/dev/null 2>&1; then
-  pass "Destructive Command Guard allows unquoted Nix flake refs"
-else
-  fail "Destructive Command Guard blocked an unquoted Nix flake ref"
-fi
-
-if ! tirith check --offline -- "echo payload | base64 -d | bash" >/dev/null 2>&1; then
-  pass "Tirith blocks an obfuscated execute chain"
-else
-  fail "Tirith decision smoke test"
-fi
-
-check_tool gcc --version
-check_tool clang --version
-check_tool clangd --version
-check_tool clang-format --version
-check_tool clang-tidy --version
-# lld is a multi-call driver whose only output is an error message directing
-# the caller to ld.lld (or ld64.lld, lld-link, wasm-ld), so no argument probe
-# exits 0. The real flavor is probed with --version below.
-check_tool lld
-check_tool ld.lld --version
-check_tool lldb --version
-check_tool cmake --version
-check_tool ninja --version
-check_tool make --version
-
-check_tool go version
-check_tool gopls version
-
-check_tool rustc --version
-check_tool cargo --version
-check_tool rustfmt --version
-check_tool rust-analyzer --version
-
-check_tool node --version
-check_tool corepack --version
-check_tool tsc --version
-check_tool vtsls --version
-
-check_tool java -version
-check_tool javac --version
-check_tool jdtls --help
-
-check_tool kotlinc -version
-check_tool kotlin -version
-check_tool gradle --version
-
-check_tool perl --version
-# perlnavigator ignores --help and --version: it always tries to start its
-# LSP connection and fails fast with a nonzero status, so there is no probe
-# that exits 0 without a connected client.
-check_tool perlnavigator
-
-check_tool uv --version
-check_tool ruff --version
-check_tool basedpyright --version
-
-check_tool dotnet --version
-
-check_tool nixd --version
-check_tool nixfmt --version
-
-check_tool playwright-cli --help
-check_tool gcx --help
-
-check_tool r2 -v
-check_tool binwalk --help
-
-check_tool adb version
-check_tool apktool --version
-check_tool jadx --version
-check_tool ilspycmd --help
-
-printf '\nChecking Ghidra headless analysis\n'
-ghidra_runtime_dir="$VERIFY_RUNTIME_DIR/ghidra-user"
-ghidra_project_dir="$VERIFY_RUNTIME_DIR/ghidra-project"
-mkdir -p "$ghidra_runtime_dir" "$ghidra_project_dir"
-ghidra_target=$(command -v bash)
-if ghidra_target_resolved=$(realpath "$ghidra_target" 2>/dev/null); then
-  ghidra_target=$ghidra_target_resolved
-elif ghidra_target_resolved=$(readlink -f "$ghidra_target" 2>/dev/null); then
-  ghidra_target=$ghidra_target_resolved
-fi
-
-if command -v ghidra-analyzeHeadless >/dev/null 2>&1; then
-  if GHIDRA_MAXMEM=512M \
-    GHIDRA_JAVA_OPTIONS="-Duser.home=$ghidra_runtime_dir" \
-    ghidra-analyzeHeadless "$ghidra_project_dir" verify -import "$ghidra_target" \
-      -noanalysis -deleteProject >"$VERIFY_RUNTIME_DIR/ghidra-headless.log" 2>&1; then
-    pass "ghidra-analyzeHeadless import"
-  else
-    fail "ghidra-analyzeHeadless import"
-  fi
-else
-  fail "ghidra-analyzeHeadless is not on PATH"
-fi
-
-check_tool tcpdump --version
-check_tool tshark --version
-check_tool nmap --version
-check_tool mitmproxy --version
-check_tool scapy -h
-check_tool socat -V
-
-check_tool flutter --version
-
-check_tool docker --version
-check_tool docker compose version
-
-if [ "$(uname -s)" = "Linux" ]; then
-  check_tool strace --version
-  check_tool ltrace --version
-fi
-
-printf '\nChecking language-server names used by LazyVim\n'
-for language_server in nixd clangd gopls rust-analyzer vtsls jdtls \
-  kotlin-language-server basedpyright perlnavigator csharp-ls; do
-  check_tool "$language_server"
-done
-
-if command -v nvim >/dev/null 2>&1; then
-  if nvim --headless -u "$ROOT_DIR/dotfiles/nvim/init.lua" \
-    '+lua assert(vim.fn.executable("nixd") == 1)' '+qa' \
-    >/dev/null 2>&1; then
-    pass "Neovim headless configuration startup"
-  else
-    fail "Neovim headless configuration startup"
-  fi
-fi
-
-if command -v flutter >/dev/null 2>&1; then
-  if flutter doctor >"$VERIFY_RUNTIME_DIR/flutter-doctor.log" 2>&1; then
-    pass "flutter doctor"
-  else
-    note "flutter doctor reported expected missing platform components; see $VERIFY_RUNTIME_DIR/flutter-doctor.log"
-  fi
-fi
-
-if command -v systemctl >/dev/null 2>&1 && systemctl is-system-running >/dev/null 2>&1; then
-  if systemctl is-active --quiet docker; then
-    pass "systemctl docker service is active"
-  else
-    note "Docker daemon is not active; start it explicitly with sudo systemctl start docker"
-  fi
-else
-  note "systemd is not running in this session; Docker daemon service check skipped"
-fi
-
-printf '\nRunning Playwright smoke test\n'
-browser_started=0
-if playwright-cli open https://example.com >"$VERIFY_RUNTIME_DIR/playwright-open.log" 2>&1; then
-  browser_started=1
-  pass "playwright-cli open https://example.com"
-else
-  fail "playwright-cli open https://example.com"
-fi
-
-if [ "$browser_started" -eq 1 ]; then
-  if playwright-cli snapshot >"$VERIFY_RUNTIME_DIR/playwright-snapshot.log" 2>&1; then
-    pass "playwright-cli snapshot"
-  else
-    fail "playwright-cli snapshot"
-  fi
-
-  if playwright-cli close >"$VERIFY_RUNTIME_DIR/playwright-close.log" 2>&1; then
-    pass "playwright-cli close"
-  else
-    fail "playwright-cli close"
-  fi
-fi
 
 if [ "$failures" -ne 0 ]; then
   printf '\n%d required checks failed.\n' "$failures" >&2
