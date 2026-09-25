@@ -37,3 +37,5 @@ The lockfile commit is not enough on its own; follow up with `just rebuild <host
 ## Verification
 
 `just verify` runs `./scripts/verify.sh`, the full host verification: tools, pi config, guards, and browser probes. `just extensions` runs `node scripts/test-pi-extensions.mjs`, the pi extension safety tests only (tirith, dcg, protected-path guards).
+
+By default the tirith test loads the deployed extension at `~/.pi/agent/extensions/tirith-guard.ts`, so a prior home-manager activation must have run; set `TIRITH_EXTENSION_PATH` to test the repository source directly instead. The guard itself honors `TIRITH_BIN` to point at a specific tirith binary.
