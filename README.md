@@ -4,9 +4,11 @@ Declarative development workstation for NixOS-WSL and Apple Silicon macOS. It us
 
 ## Install
 
-On a NixOS-WSL system:
+On a NixOS-WSL system, enable flakes first by adding `experimental-features = nix-command flakes` to `/etc/nix/nix.conf`; the stock image does not enable them:
 
 ```bash
+echo 'experimental-features = nix-command flakes' | sudo tee -a /etc/nix/nix.conf
+
 nix shell nixpkgs#git nixpkgs#openssh
 
 git clone <repository-url> nix-config
@@ -18,7 +20,7 @@ sudo nixos-rebuild switch --flake .#wsl
 
 The `wsl` output installs the workstation tools, zsh, Neovim, language servers, Docker, Flutter and Android CLI tooling, Ghidra and reverse-engineering tools, and headless Playwright and Chromium tooling. After bootstrapping, use the `just` recipes documented in [docs/JUSTFILE.md](docs/JUSTFILE.md).
 
-On Apple Silicon macOS, the `macbook` output installs the same cross-platform user environment through nix-darwin and Home Manager. Bootstrap nix-darwin from this checkout with:
+On Apple Silicon macOS, the `macbook` output installs the same cross-platform user environment through nix-darwin and Home Manager. Nix (with flakes enabled) and git must already be installed. Bootstrap nix-darwin from this checkout with:
 
 ```bash
 sudo nix run --impure .#darwinConfigurations.macbook.config.system.build.darwin-rebuild -- switch --impure --flake .#macbook
