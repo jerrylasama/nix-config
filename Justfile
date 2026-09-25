@@ -11,21 +11,22 @@ verify:
 extensions:
 	node scripts/test-pi-extensions.mjs
 
-# Rebuild and switch the NixOS-WSL host (run on the wsl machine).
-rebuild-wsl:
-	sudo nixos-rebuild switch --flake .#wsl
+# Rebuild and switch a NixOS host: `just rebuild wsl`.
+rebuild host:
+	sudo nixos-rebuild switch --flake .#{{ host }}
 
-# Rebuild the NixOS-WSL host and stage it for the next boot instead of
-# switching immediately (activate by restarting WSL: `wsl --shutdown`).
-rebuild-wsl-boot:
-	sudo nixos-rebuild boot --flake .#wsl
-
-# Rebuild and switch the darwin host (run on the macbook; --impure is
-# required so usernames resolve from SUDO_USER/USER at eval time).
+# Rebuild and switch the darwin host (macbook). Different toolchain, so it
+# stays its own recipe; --impure is required so usernames resolve from
+# SUDO_USER/USER at eval time.
 rebuild-darwin:
 	sudo nix run --impure .#darwinConfigurations.macbook.config.system.build.darwin-rebuild -- switch --impure --flake .#macbook
 
+# Rebuild a NixOS host and stage it for next boot instead of switching
+# immediately (activate by restarting WSL: `wsl --shutdown`).
+rebuild-boot host:
+	sudo nixos-rebuild boot --flake .#{{ host }}
+
 # Update flake.lock to the latest pinned inputs and commit the change.
-# Follow up with `just rebuild-wsl` or `just rebuild-darwin` on the target host.
+# Follow up with `just rebuild wsl` or `just rebuild-darwin` on the target host.
 upgrade:
 	nix flake update --commit-lock-file
