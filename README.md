@@ -52,9 +52,9 @@ On NixOS-WSL, Docker is installed without automatic daemon startup, Docker-group
 
 ## Pi agent
 
-Home Manager owns Pi's global settings and the safety extensions in `~/.pi/agent/extensions/`. Activation replaces `settings.json` with the repository policy, including the pinned `@charmland/pi-hyper-provider` package and the default `hyper/glm-5.3-flash` model. Package caches, model catalogs, sessions, trust decisions, and Hyper runtime metadata remain machine-local under `~/.pi/agent/` and are excluded from Git.
+Home Manager owns Pi's global settings and the safety extensions in `~/.pi/agent/extensions/`. Activation replaces `settings.json` with the repository policy, including the `git:git@gitlab.com:jlasama-lab/pi-extensions.git` package and the default `hyper/glm-5.3-flash` model. Package caches, model catalogs, sessions, trust decisions, and Hyper runtime metadata remain machine-local under `~/.pi/agent/` and are excluded from Git.
 
-Start Pi interactively, run `/login`, and select Charm Hyper subscription authentication. Pi owns `~/.pi/agent/auth.json`, including OAuth token refreshes; Nix never reads, links, or replaces that file. The Hyper footer defaults remain unchanged: Hypercredit balance is visible and the team name is hidden. The first online interactive launch may install the pinned provider package and populate its dynamic model catalog.
+Start Pi interactively, run `/login`, and select Charm Hyper subscription authentication. Pi owns `~/.pi/agent/auth.json`, including OAuth token refreshes; Nix never reads, links, or replaces that file. The Hyper footer defaults remain unchanged: Hypercredit balance is visible and the team name is hidden. The first online interactive launch may populate the Hyper model catalog.
 
 API-key providers can optionally use `~/.pi/agent/secrets.env`. Copy the installed `secrets.env.example`, add shell-style assignments, and restrict it before launching Pi:
 
