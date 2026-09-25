@@ -15,7 +15,17 @@ extensions:
 rebuild-wsl:
 	sudo nixos-rebuild switch --flake .#wsl
 
+# Rebuild the NixOS-WSL host and stage it for the next boot instead of
+# switching immediately (activate by restarting WSL: `wsl --shutdown`).
+rebuild-wsl-boot:
+	sudo nixos-rebuild boot --flake .#wsl
+
 # Rebuild and switch the darwin host (run on the macbook; --impure is
 # required so usernames resolve from SUDO_USER/USER at eval time).
 rebuild-darwin:
 	sudo nix run --impure .#darwinConfigurations.macbook.config.system.build.darwin-rebuild -- switch --impure --flake .#macbook
+
+# Update flake.lock to the latest pinned inputs and commit the change.
+# Follow up with `just rebuild-wsl` or `just rebuild-darwin` on the target host.
+upgrade:
+	nix flake update --commit-lock-file
