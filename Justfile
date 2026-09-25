@@ -11,8 +11,7 @@ verify:
 extensions:
 	node scripts/test-pi-extensions.mjs
 
-# Rebuild and activate a host: `just rebuild wsl` or `just rebuild darwin`.
-# Optional action (default: switch); `boot` is NixOS-only.
+# Rebuild and activate a host: `just rebuild <host> [action]`; see docs/JUSTFILE.md.
 rebuild host action="switch":
 	./scripts/rebuild.sh {{ host }} {{ action }}
 

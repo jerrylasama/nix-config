@@ -16,7 +16,7 @@ sudo nixos-rebuild switch --flake .#wsl
 ./scripts/verify.sh
 ```
 
-The `wsl` output installs the workstation tools, zsh, Neovim, language servers, Docker, Flutter and Android CLI tooling, Ghidra and reverse-engineering tools, and headless Playwright and Chromium tooling. `just verify` runs the same host checks as `./scripts/verify.sh`, and `just extensions` runs only the pi extension safety tests, and `just rebuild wsl` runs the `nixos-rebuild` command above.
+The `wsl` output installs the workstation tools, zsh, Neovim, language servers, Docker, Flutter and Android CLI tooling, Ghidra and reverse-engineering tools, and headless Playwright and Chromium tooling. After bootstrapping, use the `just` recipes documented in [docs/JUSTFILE.md](docs/JUSTFILE.md).
 
 On Apple Silicon macOS, the `macbook` output installs the same cross-platform user environment through nix-darwin and Home Manager. Bootstrap nix-darwin from this checkout with:
 
@@ -24,8 +24,6 @@ On Apple Silicon macOS, the `macbook` output installs the same cross-platform us
 sudo nix run --impure .#darwinConfigurations.macbook.config.system.build.darwin-rebuild -- switch --impure --flake .#macbook
 ./scripts/verify.sh
 ```
-
-After bootstrapping, `just rebuild darwin` runs the same `nix run` command.
 
 ## Windows helpers
 
