@@ -3,6 +3,7 @@
   den.aspects.common-cli = {
     homeManager = { pkgs, ... }: {
       home.packages = with pkgs; [
+        ansible
         git
         gitleaks
         gh
