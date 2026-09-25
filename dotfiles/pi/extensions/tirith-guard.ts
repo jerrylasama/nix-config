@@ -26,7 +26,7 @@
 
 import { execFile, execFileSync } from "node:child_process";
 
-const TIRITH_BIN = process.env.TIRITH_BIN ?? "tirith";
+const tirithBin = () => process.env.TIRITH_BIN ?? "tirith";
 const TIRITH_INTEGRATION = "pi-cli";
 
 /** Tool names that carry a shell command string in `input.command`. */
@@ -1150,7 +1150,7 @@ function hookEvent(event, detail) {
       "--hook-type", "tool_call", "--event", event,
     ];
     if (detail) args.push("--detail", detail);
-    execFile(TIRITH_BIN, args, () => {});
+    execFile(tirithBin(), args, () => {});
   } catch {
     /* telemetry is best effort */
   }
@@ -1229,7 +1229,7 @@ export default function (pi) {
 
     try {
       execFileSync(
-        TIRITH_BIN,
+        tirithBin(),
         ["check", "--json", "--non-interactive", "--shell", "posix"],
         {
           input: script,
@@ -1246,7 +1246,7 @@ export default function (pi) {
         if (failOpen()) return undefined;
         return {
           block: true,
-          reason: `tirith: ${TIRITH_BIN} not found — reinstall the integration or set TIRITH_FAIL_OPEN=1`,
+          reason: `tirith: ${tirithBin()} not found — reinstall the integration or set TIRITH_FAIL_OPEN=1`,
         };
       }
       if (err.killed) {

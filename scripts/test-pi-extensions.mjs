@@ -39,6 +39,7 @@ process.env.TIRITH_BIN = "/definitely/missing/tirith";
 assert.equal((await tirith({ toolName: "bash", input: { command: "printf safe" } }, context({ hasUI: false }))).block, true);
 if (originalTirithBin === undefined) delete process.env.TIRITH_BIN;
 else process.env.TIRITH_BIN = originalTirithBin;
+assert.equal(await tirith({ toolName: "bash", input: { command: "printf safe" } }, context()), undefined);
 
 const protectedPath = loadHandler(protectedPathGuard);
 assert.equal(await protectedPath({ toolName: "read", input: { path: "README.md" } }, context()), undefined);
