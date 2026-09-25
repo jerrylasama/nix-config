@@ -25,7 +25,7 @@ sudo nix run --impure .#darwinConfigurations.macbook.config.system.build.darwin-
 ./scripts/verify.sh
 ```
 
-After bootstrapping, `just rebuild-darwin` runs the same `nix run` command.
+After bootstrapping, `just rebuild darwin` runs the same `nix run` command.
 
 ## Windows helpers
 

@@ -11,19 +11,12 @@ verify:
 extensions:
 	node scripts/test-pi-extensions.mjs
 
-# Rebuild a NixOS host and activate it. Default action is `switch`;
-# pass `boot` to stage it for the next boot instead (activate by
-# restarting WSL: `wsl --shutdown`). Usage: just rebuild wsl [boot]
+# Rebuild and activate a host: `just rebuild wsl` or `just rebuild darwin`.
+# Optional action (default: switch); `boot` is NixOS-only.
 rebuild host action="switch":
-	sudo nixos-rebuild {{ action }} --flake .#{{ host }}
-
-# Rebuild and switch the darwin host (macbook). Different toolchain, so it
-# stays its own recipe; --impure is required so usernames resolve from
-# SUDO_USER/USER at eval time.
-rebuild-darwin:
-	sudo nix run --impure .#darwinConfigurations.macbook.config.system.build.darwin-rebuild -- switch --impure --flake .#macbook
+	./scripts/rebuild.sh {{ host }} {{ action }}
 
 # Update flake.lock to the latest pinned inputs and commit the change.
-# Follow up with `just rebuild wsl` or `just rebuild-darwin` on the target host.
+# Follow up with `just rebuild wsl` or `just rebuild darwin` on the target host.
 upgrade:
 	nix flake update --commit-lock-file
