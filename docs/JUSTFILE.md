@@ -34,6 +34,14 @@ just rebuild wsl
 
 The lockfile commit is not enough on its own; follow up with `just rebuild <host>` on the target host to activate the updated inputs.
 
+## Scanning for secrets
+
+`just scan` runs `gitleaks detect`, which scans the working tree and the full git history for leaked secrets. A non-zero exit means findings were reported; gitleaks prints its own summary of what it found, so there is nothing extra to read. It is the plain command with no flags:
+
+```bash
+just scan
+```
+
 ## Verification
 
 `just verify` runs `./scripts/verify.sh`, the full host verification: tools, pi config, guards, and browser probes. `just extensions` runs `node scripts/test-pi-extensions.mjs`, the pi extension safety tests only (tirith, dcg, protected-path guards).

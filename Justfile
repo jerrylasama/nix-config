@@ -19,3 +19,7 @@ rebuild host action="switch":
 # Follow up with `just rebuild wsl` or `just rebuild darwin` on the target host.
 upgrade:
 	nix flake update --commit-lock-file
+
+# Scan the repository and its full git history for leaked secrets.
+scan:
+	gitleaks detect

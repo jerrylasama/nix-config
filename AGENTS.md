@@ -10,6 +10,7 @@ just verify                  # Full host verification: tools, pi config, guards,
 just extensions              # Pi extension safety tests only (tirith, dcg, protected-path guards)
 just rebuild <host> [action] # Rebuild and activate a host; hosts and actions: docs/JUSTFILE.md
 just upgrade                 # Update flake.lock to the latest pinned inputs and commit the change
+just scan                    # Scan the repo and its git history for leaked secrets (gitleaks)
 ```
 
 ## Conventions
