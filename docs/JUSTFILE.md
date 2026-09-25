@@ -4,7 +4,7 @@
 
 ## Rebuilding a host
 
-`just rebuild <host>` rebuilds and activates a host from this flake. The supported hosts are `wsl` (NixOS-WSL, rebuilt with `nixos-rebuild`) and `macbook` (Apple Silicon macOS, rebuilt with the flake's `darwin-rebuild`).
+`just rebuild <host>` rebuilds and activates a host from this flake. The supported hosts are `wsl` (NixOS-WSL, rebuilt with `nixos-rebuild`) and `macbook` (Apple Silicon macOS, rebuilt with the flake's `darwin-rebuild`). For the Mac, `darwin` is accepted as an alias for the host's flake name `macbook`, so `just rebuild darwin` and `just rebuild macbook` do the same thing.
 
 The optional action parameter defaults to `switch`. Valid actions differ per host:
 

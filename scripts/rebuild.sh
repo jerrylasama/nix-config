@@ -11,7 +11,7 @@ case "$host" in
 wsl)
 	sudo nixos-rebuild "$action" --flake .#wsl
 	;;
-macbook)
+macbook|darwin)
 	sudo nix run --impure .#darwinConfigurations.macbook.config.system.build.darwin-rebuild -- "$action" --impure --flake .#macbook
 	;;
 *)
