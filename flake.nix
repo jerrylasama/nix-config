@@ -50,6 +50,16 @@
         "mips-android-sysimage-license"
       ];
 
+      # The single definition of the portable package set; the packages
+      # output below derives from it.
+      agentPackageNames = [
+        "codex"
+        "dcg"
+        "gcx"
+        "playwright-cli"
+        "tirith"
+      ];
+
       customPackages = lib.genAttrs supportedSystems (
         system:
         let
@@ -73,14 +83,7 @@
               }).androidsdk;
           };
         in
-        {
-          codex = pkgs.callPackage ./packages/codex { };
-          dcg = pkgs.callPackage ./packages/dcg { };
-          gcx = pkgs.callPackage ./packages/gcx { };
-          playwright-cli = pkgs.callPackage ./packages/playwright-cli { };
-          tirith = pkgs.callPackage ./packages/tirith { };
-        }
-        // androidPackages
+        lib.genAttrs agentPackageNames (name: pkgs.callPackage ./packages/${name} { }) // androidPackages
       );
 
       # `nix fmt` with no args must not hand an empty stdin to nixfmt; format
@@ -113,15 +116,7 @@
     in
     den
     // {
-      packages = lib.mapAttrs (_system: packages: {
-        inherit (packages)
-          codex
-          dcg
-          gcx
-          playwright-cli
-          tirith
-          ;
-      }) customPackages;
+      packages = lib.mapAttrs (_system: packages: lib.getAttrs agentPackageNames packages) customPackages;
       formatter = lib.genAttrs supportedSystems nixfmtFormatter;
       apps = lib.genAttrs supportedSystems (system: {
         formatter = {
