@@ -43,21 +43,7 @@ in
         useUserPackages = true;
       };
 
-      nixpkgs.config = {
-        allowUnfreePredicate =
-          pkg:
-          lib.elem (lib.getName pkg) [
-            "android-sdk-cmdline-tools"
-            "cmdline-tools"
-            "android-sdk-platform-tools"
-            "platform-tools"
-            "android-sdk-build-tools"
-            "build-tools"
-            "android-sdk-platforms"
-            "platforms"
-          ];
-        android_sdk.accept_license = true;
-      };
+      nixpkgs.config = import ../lib/nixpkgs-config.nix { inherit lib; };
 
       # Docker remains installed, but its daemon and root-equivalent
       # docker-group access are opt-in on this shared configuration.

@@ -42,21 +42,7 @@
         "aarch64-linux"
         "aarch64-darwin"
       ];
-      androidSdkConfig = {
-        allowUnfreePredicate =
-          pkg:
-          lib.elem (lib.getName pkg) [
-            "android-sdk-cmdline-tools"
-            "cmdline-tools"
-            "android-sdk-platform-tools"
-            "platform-tools"
-            "android-sdk-build-tools"
-            "build-tools"
-            "android-sdk-platforms"
-            "platforms"
-          ];
-        android_sdk.accept_license = true;
-      };
+      androidSdkConfig = import ./lib/nixpkgs-config.nix { inherit lib; };
       androidSdkExtraLicenses = [
         "android-googletv-license"
         "android-googlexr-license"
