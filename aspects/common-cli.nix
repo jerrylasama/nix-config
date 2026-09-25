@@ -2,37 +2,36 @@
 {
   den.aspects.common-cli = {
     homeManager = { pkgs, ... }: {
-      home.packages = with pkgs; [
-        ansible
-        git
-        gitleaks
-        gh
-        tea
-        deploy-rs
-        gnupg
-        rtk
+      home.packages = [
+        pkgs.ansible
+        pkgs.git
+        pkgs.gitleaks
+        pkgs.gh
+        pkgs.tea
+        pkgs.deploy-rs
+        pkgs.gnupg
+        pkgs.rtk
 
         # Secrets management (sops-nix uses age by default)
-        sops
-        age
-        age-plugin-yubikey
+        pkgs.sops
+        pkgs.age
+        pkgs.age-plugin-yubikey
 
-        curl
-        wget
+        pkgs.curl
+        pkgs.wget
 
-        jq
-        yq
+        pkgs.jq
+        pkgs.yq
 
-        ripgrep
-        fd
-        fzf
+        pkgs.ripgrep
+        pkgs.fd
+        pkgs.fzf
 
-        tree
-        unzip
-        zip
-        gnumake
-        just
-        shellcheck
+        pkgs.tree
+        pkgs.unzip
+        pkgs.zip
+        pkgs.just
+        pkgs.shellcheck
       ];
 
       programs.git = {

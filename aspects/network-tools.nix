@@ -2,13 +2,13 @@
 {
   den.aspects.network-tools = {
     homeManager = { pkgs, ... }: {
-      home.packages = with pkgs; [
-        tcpdump
-        wireshark-cli
-        nmap
-        mitmproxy
-        python3Packages.scapy
-        socat
+      home.packages = [
+        pkgs.tcpdump
+        pkgs.wireshark-cli
+        pkgs.nmap
+        pkgs.mitmproxy
+        pkgs.python3Packages.scapy
+        pkgs.socat
       ];
     };
   };

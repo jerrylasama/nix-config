@@ -2,22 +2,20 @@
 {
   den.aspects.reverse-engineering = {
     homeManager = { lib, pkgs, ... }: {
-      home.packages =
-        with pkgs;
-        [
-          radare2
-          binwalk
-          ghidra
+      home.packages = [
+        pkgs.radare2
+        pkgs.binwalk
+        pkgs.ghidra
 
-          android-tools
-          apktool
-          jadx
-          ilspycmd
-        ]
-        ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
-          strace
-          ltrace
-        ];
+        pkgs.android-tools
+        pkgs.apktool
+        pkgs.jadx
+        pkgs.ilspycmd
+      ]
+      ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
+        pkgs.strace
+        pkgs.ltrace
+      ];
     };
   };
 }
