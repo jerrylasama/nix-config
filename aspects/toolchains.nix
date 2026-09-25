@@ -36,8 +36,15 @@
           pkgs.gradle
 
           pkgs.perl
-          pkgs.uv
         ];
+
+        programs.uv = {
+          enable = true;
+          settings = {
+            python-downloads = "automatic";
+            python-preference = "only-managed";
+          };
+        };
 
         home.sessionVariables = {
           GRADLE_USER_HOME = "${config.xdg.cacheHome}/gradle";
