@@ -50,6 +50,8 @@
           };
         };
 
+        home.sessionPath = [ "$HOME/.local/bin" ];
+
         home.sessionVariables = {
           GRADLE_USER_HOME = "${config.xdg.cacheHome}/gradle";
         };
