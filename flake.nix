@@ -102,6 +102,26 @@
         // androidPackages
       );
 
+      # `nix fmt` with no args must not hand an empty stdin to nixfmt; format
+      # tracked .nix files instead. `nix run .#formatter` needs an `apps` entry.
+      nixfmtFormatter =
+        system:
+        let
+          pkgs = inputs.nixpkgs.legacyPackages.${system};
+        in
+        (pkgs.writeShellScriptBin "nixfmt" ''
+          if [ "$#" -eq 0 ]; then
+            set -- $(${pkgs.git}/bin/git ls-files '*.nix')
+            [ "$#" -eq 0 ] && exit 0
+          fi
+          exec ${pkgs.nixfmt}/bin/nixfmt "$@"
+        '').overrideAttrs
+          (old: {
+            meta = (old.meta or { }) // {
+              mainProgram = "nixfmt";
+            };
+          });
+
       den =
         (inputs.nixpkgs.lib.evalModules {
           modules = [ (inputs.import-tree ./modules) ];
@@ -121,6 +141,12 @@
           tirith
           ;
       }) customPackages;
-      formatter = lib.genAttrs supportedSystems (system: inputs.nixpkgs.legacyPackages.${system}.nixfmt);
+      formatter = lib.genAttrs supportedSystems nixfmtFormatter;
+      apps = lib.genAttrs supportedSystems (system: {
+        formatter = {
+          type = "app";
+          program = "${nixfmtFormatter system}/bin/nixfmt";
+        };
+      });
     };
 }
