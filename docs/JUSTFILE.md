@@ -1,0 +1,39 @@
+# Just commands
+
+`just` is a thin facade over the scripts in `scripts/`; the scripts remain the real interface and work without `just`. Run `just --list` to see the available recipes at any time. They are documented here for convenience.
+
+## Rebuilding a host
+
+`just rebuild <host>` rebuilds and activates a host from this flake. The supported hosts are `wsl` (NixOS-WSL, rebuilt with `nixos-rebuild`) and `macbook` (Apple Silicon macOS, rebuilt with the flake's `darwin-rebuild`).
+
+The optional action parameter defaults to `switch`. Valid actions differ per host:
+
+| Host      | Actions                              |
+| --------- | ------------------------------------ |
+| `wsl`     | `switch`, `boot`, `test`, `dry-activate` |
+| `macbook` | `switch`, `build`, `activate`, `rollback` |
+
+`boot` stages a new system configuration for the next reboot and is NixOS-only. Examples:
+
+```bash
+just rebuild wsl
+just rebuild macbook
+just rebuild wsl boot
+```
+
+Rebuilds run locally on the target machine; they are not cross-host deploys. Run `just rebuild wsl` on the WSL host and `just rebuild macbook` on the Mac.
+
+## Upgrading
+
+`just upgrade` updates `flake.lock` to the latest pinned inputs and commits the change:
+
+```bash
+just upgrade
+just rebuild wsl
+```
+
+The lockfile commit is not enough on its own; follow up with `just rebuild <host>` on the target host to activate the updated inputs.
+
+## Verification
+
+`just verify` runs `./scripts/verify.sh`, the full host verification: tools, pi config, guards, and browser probes. `just extensions` runs `node scripts/test-pi-extensions.mjs`, the pi extension safety tests only (tirith, dcg, protected-path guards).

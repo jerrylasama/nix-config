@@ -69,4 +69,4 @@ Interactive `/settings`, `/model`, `pi install`, and `/hyper-status` changes can
 
 ## Secrets management
 
-The CLI tools include `sops`, `age`, and `age-plugin-yubikey`, and `aspects/secrets.nix` imports the sops-nix home-manager module on both hosts. The module stays inactive until at least one `sops.secrets` entry is declared. Key generation, `.sops.yaml` setup, and YubiKey onboarding are documented in [docs/SOPS_AGE_YUBIKEY.md](docs/SOPS_AGE_YUBIKEY.md).
+The CLI tools include `sops`, `age`, and `age-plugin-yubikey`, and `aspects/secrets.nix` imports the sops-nix home-manager module on both hosts. The module stays inactive until at least one `sops.secrets` entry is declared. Key generation, `.sops.yaml` setup, and YubiKey onboarding are documented in [docs/SOPS_AGE_YUBIKEY.md](docs/SOPS_AGE_YUBIKEY.md). Just recipes are documented in [docs/JUSTFILE.md](docs/JUSTFILE.md).
