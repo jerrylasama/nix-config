@@ -13,15 +13,10 @@
         dcg = inputs.customPackages.${pkgs.stdenv.hostPlatform.system}.dcg;
         tirith = inputs.customPackages.${pkgs.stdenv.hostPlatform.system}.tirith;
         pi = pkgs.pi-coding-agent;
-        # tirith's setup generator refuses to run in a nix build sandbox: its
-        # anti-tampering check reads the store binary as owned by uid 65534
-        # under the sandbox user-namespace mapping. Both generated files are
-        # vendored instead. Re-vendor them when the pinned version in
-        # packages/tirith changes:
-        #   tirith setup pi-cli --scope user --update-configs --force --quiet
-        #   tirith setup codex  --scope user --update-configs --force --quiet
-        # The pi extension is generated with TIRITH_BIN set to the store path;
-        # it is kept as a PATH lookup so it works from home.packages.
+        # The generated files are vendored; the reason and re-vendor procedure
+        # live in packages/tirith/default.nix. The pi extension is generated
+        # with TIRITH_BIN set to the store path; it is kept as a PATH lookup
+        # so it works from home.packages.
         tirithPiExtension = ../dotfiles/pi/extensions/tirith-guard.ts;
         tirithCodexGateway = ../dotfiles/tirith/gateway.yaml;
         tirithGatewayConfig = "${config.home.homeDirectory}/.config/tirith/gateway.yaml";

@@ -9,8 +9,9 @@
 # at 0.3.3. 0.4.x refuses to execute inside a nix build sandbox (its
 # anti-tampering check reads the store binary as uid 65534), so its generated
 # pi extension and codex gateway file are vendored under dotfiles/ instead of
-# run from a runCommand. Re-vendor both on every version bump; see
-# aspects/agents.nix.
+# run from a runCommand. Re-vendor both on every version bump:
+#   tirith setup pi-cli --scope user --update-configs --force --quiet
+#   tirith setup codex  --scope user --update-configs --force --quiet
 let
   version = "0.4.2";
   platform =
