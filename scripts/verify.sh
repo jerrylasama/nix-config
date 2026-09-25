@@ -72,7 +72,11 @@ check_tool git --version
 check_tool gh --version
 check_tool tea --version
 check_tool deploy --version
+check_tool ansible --version
 check_tool gpg2 --version
+check_tool sops --version
+check_tool age --version
+check_tool age-plugin-yubikey --version
 check_tool rtk --version
 check_tool rtk gain
 
@@ -192,6 +196,9 @@ check_tool clang --version
 check_tool clangd --version
 check_tool clang-format --version
 check_tool clang-tidy --version
+# lld is a multi-call driver whose only output is an error message directing
+# the caller to ld.lld (or ld64.lld, lld-link, wasm-ld), so no argument probe
+# exits 0. The real flavor is probed with --version below.
 check_tool lld
 check_tool ld.lld --version
 check_tool lldb --version
@@ -221,6 +228,9 @@ check_tool kotlin -version
 check_tool gradle --version
 
 check_tool perl --version
+# perlnavigator ignores --help and --version: it always tries to start its
+# LSP connection and fails fast with a nonzero status, so there is no probe
+# that exits 0 without a connected client.
 check_tool perlnavigator
 
 check_tool uv --version
