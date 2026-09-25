@@ -27,7 +27,7 @@ in
       den.aspects.containers
     ];
 
-    nixos = { lib, pkgs, ... }: {
+    nixos = { lib, ... }: {
       wsl = {
         enable = true;
         defaultUser = detectedUser;
@@ -58,11 +58,6 @@ in
           ];
         android_sdk.accept_license = true;
       };
-
-      environment.systemPackages = [
-        pkgs.docker
-        pkgs.docker-compose
-      ];
 
       # Docker remains installed, but its daemon and root-equivalent
       # docker-group access are opt-in on this shared configuration.
