@@ -48,6 +48,9 @@
             versions = [ "3.14.7" ];
             default = [ "3.14.7" ];
           };
+          # `--default` shims only `python`/`python3`; uv never exposes pip.
+          # Install pip as a uv tool so bare `pip` also resolves.
+          tool.packages = [ "pip" ];
         };
 
         home.sessionPath = [ "$HOME/.local/bin" ];
@@ -56,5 +59,13 @@
           GRADLE_USER_HOME = "${config.xdg.cacheHome}/gradle";
         };
       };
+
+    # uv-managed Pythons are upstream (python-build-standalone) binaries that
+    # expect a conventional dynamic loader at /lib64/ld-linux-*.so.2. NixOS
+    # puts only a stub there, which refuses to run them; nix-ld supplies a
+    # working loader so the installed interpreters and shims can execute.
+    nixos = {
+      programs.nix-ld.enable = true;
+    };
   };
 }
