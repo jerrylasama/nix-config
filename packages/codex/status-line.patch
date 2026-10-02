@@ -96,11 +96,19 @@ index 6377503..49e9f5e 100644
      pub resets_at: Option<String>,
      /// Window length in minutes when provided by the server.
      pub window_minutes: Option<i64>,
-@@ -81,7 +81,7 @@ impl RateLimitWindowDisplay {
+@@ -81,14 +81,13 @@ impl RateLimitWindowDisplay {
+     fn from_window(
+         window: &RateLimitWindow,
+         captured_at: DateTime<Local>,
+-        clock_format: ClockFormat,
++        _clock_format: ClockFormat,
+     ) -> Self {
+         let resets_at_utc = window
              .resets_at
              .and_then(|seconds| DateTime::<Utc>::from_timestamp(seconds, 0))
              .map(|dt| dt.with_timezone(&Local));
--        let resets_at = resets_at_utc.map(|dt| format_reset_timestamp(dt, captured_at));
+-        let resets_at =
+-            resets_at_utc.map(|dt| format_reset_timestamp(dt, captured_at, clock_format));
 +        let resets_at = resets_at_utc.map(|dt| format_reset_countdown(dt, captured_at));
  
          Self {
