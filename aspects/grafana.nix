@@ -24,7 +24,11 @@
               stack: default
           current-context: default
         '';
-        home.file.".config/gcx/config.yaml".source = config.sops.templates.gcx-config.path;
+        # mkOutOfStoreSymlink: the rendered file appears only after the
+        # sops-nix launchd agent runs (post-activation), so the link must be
+        # created without requiring the target to exist yet.
+        home.file.".config/gcx/config.yaml".source =
+          config.lib.file.mkOutOfStoreSymlink config.sops.templates.gcx-config.path;
       };
   };
 }
