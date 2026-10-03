@@ -1,0 +1,6 @@
+# sops creation rules: everything under secrets/ encrypts to the user's age
+# identity. The matching private key lives at ~/.config/sops/age/keys.txt
+# (see docs/SOPS_AGE_YUBIKEY.md).
+creation_rules:
+  - path_regex: secrets/.*\.yaml$
+    age: age14fpfjh8njws3zznth5u3jrjzcl8s9na0yjhesnmx92quf7csuc5q28kxmt
