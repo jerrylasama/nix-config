@@ -10,6 +10,7 @@
       }:
       let
         playwrightCli = inputs.customPackages.${pkgs.stdenv.hostPlatform.system}.playwright-cli;
+        bsk = inputs.customPackages.${pkgs.stdenv.hostPlatform.system}.bsk;
         cliConfig = builtins.toJSON {
           browser = {
             browserName = "chromium";
@@ -28,6 +29,7 @@
       {
         home.packages = [
           playwrightCli
+          bsk
         ]
         ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [ pkgs.chromium ];
 

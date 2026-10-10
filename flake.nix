@@ -55,6 +55,7 @@
       agentPackageNames = [
         "codex"
         "dcg"
+        "bsk"
         "gcx"
         "playwright-cli"
         "tirith"
