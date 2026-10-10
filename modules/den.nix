@@ -20,6 +20,7 @@
     ../aspects/language-tools.nix
     ../aspects/browser-tools.nix
     ../aspects/grafana.nix
+    ../aspects/synology-codex.nix
     ../aspects/reverse-engineering.nix
     ../aspects/network-tools.nix
     ../aspects/containers.nix
@@ -39,6 +40,7 @@
       den.aspects.language-tools
       den.aspects.browser-tools
       den.aspects.grafana
+      den.aspects.synology-codex
       den.aspects.reverse-engineering
       den.aspects.network-tools
       den.aspects.containers
