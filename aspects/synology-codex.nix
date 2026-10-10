@@ -1,6 +1,14 @@
 { den, ... }:
 {
   den.aspects.synology-codex = {
+    # Pin the Synology host key system-wide (TOFU captured via ssh-keyscan,
+    # SHA256:DWYOJBUwdv6E9Cf0fwBLxv0CbAEKX3L632xe1yBuEgs). ssh checks the
+    # global known_hosts file in addition to ~/.ssh/known_hosts.
+    nixos.programs.ssh.knownHosts.synology = {
+      hostNames = [ "synology" ];
+      publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEsx7XGJjOm4KqIQM3AA/rji63qJWFGvsDUE+gFUTeiy";
+    };
+
     homeManager =
       { config, ... }:
       {
@@ -18,11 +26,13 @@
         home.file.".ssh/id_ed25519_synology_codex.pub".source =
           config.lib.file.mkOutOfStoreSymlink config.sops.secrets.synology-codex-pub.path;
 
-        programs.ssh.matchBlocks.synology-codex = {
-          hostName = "synology";
-          user = "codex";
-          identityFile = "~/.ssh/id_ed25519_synology_codex";
-          identitiesOnly = true;
+        # Upstream directive names; programs.ssh.settings replaced matchBlocks.
+        programs.ssh.enable = true;
+        programs.ssh.settings.synology-codex = {
+          HostName = "synology";
+          User = "codex";
+          IdentityFile = "~/.ssh/id_ed25519_synology_codex";
+          IdentitiesOnly = true;
         };
       };
   };
