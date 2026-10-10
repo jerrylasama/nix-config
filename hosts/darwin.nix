@@ -51,6 +51,18 @@ in
   };
 
   den.aspects.${darwinUser} = {
+    # The pre-existing Homebrew install lives at /opt/homebrew, but nix-darwin
+    # replaces /etc/zprofile so macOS's path_helper never runs, and Home
+    # Manager owns ~/.zprofile so old `brew shellenv` lines are gone. Add the
+    # brew directories back onto PATH via hm-session-vars (sourced from the
+    # HM-managed ~/.zprofile for login shells).
+    homeManager = {
+      home.sessionPath = [
+        "/opt/homebrew/bin"
+        "/opt/homebrew/sbin"
+      ];
+    };
+
     includes = [
       den.batteries.primary-user
       (den.batteries.user-shell "zsh")
