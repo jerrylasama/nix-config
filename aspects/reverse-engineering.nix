@@ -14,7 +14,10 @@
       ]
       ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
         pkgs.strace
-        pkgs.ltrace
+        # ltrace's dejagnu suite is flaky and fails the build (nixpkgs#449414, #475879)
+        (pkgs.ltrace.overrideAttrs (_: {
+          doCheck = false;
+        }))
       ];
     };
   };
