@@ -12,7 +12,9 @@
         codex = inputs.customPackages.${pkgs.stdenv.hostPlatform.system}.codex;
         dcg = inputs.customPackages.${pkgs.stdenv.hostPlatform.system}.dcg;
         tirith = inputs.customPackages.${pkgs.stdenv.hostPlatform.system}.tirith;
-        pi = pkgs.pi-coding-agent;
+        # Pi-Bolt replaces upstream pi: same ~/.pi/agent, sessions, settings
+        # and extensions, but an AOT-compiled native executable.
+        pi = inputs.customPackages.${pkgs.stdenv.hostPlatform.system}.pi-bolt;
         # The generated files are vendored; the reason and re-vendor procedure
         # live in packages/tirith/default.nix. The pi extension is generated
         # with TIRITH_BIN set to the store path; it is kept as a PATH lookup

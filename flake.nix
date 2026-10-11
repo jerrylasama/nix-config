@@ -59,6 +59,7 @@
         "gcx"
         "playwright-cli"
         "tirith"
+        "pi-bolt"
       ];
 
       customPackages = lib.genAttrs supportedSystems (
