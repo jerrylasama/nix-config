@@ -19,6 +19,7 @@
 
         pkgs.curl
         pkgs.wget
+        pkgs.rsync
 
         pkgs.jq
         pkgs.yq
