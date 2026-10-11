@@ -30,6 +30,7 @@
           pkgs.nodejs
           pkgs.typescript
           pkgs.vtsls
+          pkgs.bun
 
           pkgs.jdk21
           pkgs.kotlin
