@@ -12,6 +12,7 @@
   stdenv,
   fetchurl,
   autoPatchelfHook,
+  libxcb,
 }:
 
 let
@@ -49,6 +50,8 @@ stdenv.mkDerivation {
   ];
   buildInputs = lib.optionals stdenv.hostPlatform.isLinux [
     stdenv.cc.cc.lib
+    # linux-platform-x11.node links against libxcb.so.1
+    libxcb
   ];
 
   # Prebuilt binaries: leave them byte-for-byte intact.
