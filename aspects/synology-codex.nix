@@ -28,6 +28,24 @@
 
         # Upstream directive names; programs.ssh.settings replaced matchBlocks.
         programs.ssh.enable = true;
+
+        # Silence the HM deprecation warning: keep the old defaults explicitly
+        # (copied verbatim from the HM ssh module) instead of relying on the
+        # soon-to-be-removed implicit defaults.
+        programs.ssh.enableDefaultConfig = false;
+        programs.ssh.settings."*" = {
+          ForwardAgent = false;
+          AddKeysToAgent = "no";
+          Compression = false;
+          ServerAliveInterval = 0;
+          ServerAliveCountMax = 3;
+          HashKnownHosts = false;
+          UserKnownHostsFile = "~/.ssh/known_hosts";
+          ControlMaster = "no";
+          ControlPath = "~/.ssh/master-%r@%n:%p";
+          ControlPersist = "no";
+        };
+
         programs.ssh.settings.synology-codex = {
           HostName = "synology";
           User = "codex";
