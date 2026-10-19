@@ -174,7 +174,7 @@
           trap - EXIT
 
           if [ ! -e "$pi_dir/secrets.env" ]; then
-            echo "Pi: optional API-key file is absent; copy $pi_dir/secrets.env.example to $pi_dir/secrets.env and chmod 600 it, or use /login for Hyper OAuth."
+            echo "Pi: optional API-key file is absent; copy $pi_dir/secrets.env.example to $pi_dir/secrets.env and chmod 600 it if you authenticate providers with an API key."
           fi
           unset pi_dir settings_path temporary
         '';
